@@ -1,4 +1,4 @@
-package repository;
+package repository.classExamples;
 
 public class User {
     private int id;
