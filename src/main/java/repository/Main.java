@@ -23,7 +23,7 @@ public class Main {
         animals.add(new Animal(1, "bbb", 2.0));
         animals.add(new Animal(2, "ccc", 2.0));
 
-        repository.insertOne(new User(23, 2.34, false, "aaaa", animals));
+        repository.insertOne(new User(24, 2.34, false, "aaaa", animals));
 
 //        // ------------------- Animal -----------------------------
 //        Repository<Animal> animalRepository = new Repository<>(Animal.class);

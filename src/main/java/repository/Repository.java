@@ -19,7 +19,7 @@ public class Repository<T> {
         List<T> results = null;
 
         try {
-            SQLConnection2 connection = SQLConnection2.getInstance("connectionData.json");
+            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
 
             Statement stmt = connection.getConnection().createStatement();
             ResultSet resultSet = stmt.executeQuery(query);
@@ -61,7 +61,7 @@ public class Repository<T> {
     public <T> void insertOne(T obj) {
         try {
             // the mysql insert statement
-            SQLConnection2 connection = SQLConnection2.getInstance("connectionData.json");
+            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
             Statement st = connection.getConnection().createStatement();
 
             // create keysStr and valuesStr for query
