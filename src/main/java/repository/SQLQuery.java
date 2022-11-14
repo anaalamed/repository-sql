@@ -1,6 +1,8 @@
 package repository;
 
 import com.google.gson.Gson;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ public class SQLQuery {
 
     public static class SQLQueryBuilder {
         private String query;
+
+        private static Logger logger = LogManager.getLogger(SQLQueryBuilder.class.getName());
 
 
         public SQLQueryBuilder select() {
@@ -108,7 +112,9 @@ public class SQLQuery {
         }
 
         public <T> SQLQueryBuilder insertOne(T object) {
+            logger.info("insertOne");
             String[] keysValuesArr = getKeysValuesOfObject(object);
+            logger.debug("values: " + keysValuesArr[1]);
 
             query = "INSERT INTO " + parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") "
                     + "VALUES (" + keysValuesArr[1] + ")";

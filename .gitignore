@@ -7,7 +7,7 @@
 .DS_Store
 
 # Maven
-log/
+logs/
 target/
 
 connectionData.json

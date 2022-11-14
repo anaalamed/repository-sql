@@ -1,5 +1,7 @@
 package repository;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import repository.annotations.Constraints;
 
 import java.lang.reflect.Constructor;
@@ -11,6 +13,9 @@ import java.util.*;
 public class Repository<T> {
     private final Class<T> clz;
 
+    private static Logger logger = LogManager.getLogger(Repository.class.getName());
+
+
 
     public Repository(Class<T> clz) {
         this.clz = clz;
@@ -18,6 +23,7 @@ public class Repository<T> {
 
     public void createTable() {
         String query = new SQLQuery.SQLQueryBuilder().createTable(clz).build().toString();
+        logger.debug("query: " + query);
 
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
              Statement statement = connection.getConnection().createStatement()) {
@@ -30,6 +36,7 @@ public class Repository<T> {
 
     public List<T> getAll() {
         String query = new SQLQuery.SQLQueryBuilder().select().from(clz).build().toString();
+        logger.debug("query: " + query);
         return select(query);
     }
 
@@ -42,18 +49,23 @@ public class Repository<T> {
         List<String> conditions = new ArrayList<>();
         conditions.add(propertyName + " = \"" + value + "\"");
         String query = new SQLQuery.SQLQueryBuilder().select().from(clz).where(conditions).build().toString();
+        logger.debug("query: " + query);
 
         return select(query);
     }
 
     public void insertOne(T object) {
+        logger.info("insertOne");
         String query = new SQLQuery.SQLQueryBuilder().insertOne(object).build().toString();
+        logger.debug("query: " + query);
         update(query);
     }
 
     public void insertMany(List<T> objects) {
         // new query for training
+        logger.info("insertMany");
         String query = new SQLQuery.SQLQueryBuilder().insertMany(objects).build().toString();
+        logger.debug("query: " + query);
         update(query);
     }
 
@@ -62,6 +74,7 @@ public class Repository<T> {
         conditions.add(propertyName + " = \"" + value + "\"");
 
         String query = new SQLQuery.SQLQueryBuilder().delete().from(clz).where(conditions).build().toString();
+        logger.debug("query: " + query);
         update(query);
     }
 
@@ -73,14 +86,18 @@ public class Repository<T> {
         updates.add(propertyNameToUpdate + " = \"" + valueToUpdate + "\"");
 
         String query = new SQLQuery.SQLQueryBuilder().update(clz).set(updates).where(conditions).build().toString();
+        logger.debug("query: " + query);
         update(query);
     }
 
     public void deleteTable() {
         String query = new SQLQuery.SQLQueryBuilder().dropTable(clz).build().toString();
+        logger.debug("query: " + query);
         update(query);
     }
 
+
+    // --------------------------- help methods ---------------------------------
     public List<T> select(String query) {
         List<T> results = null;
 
