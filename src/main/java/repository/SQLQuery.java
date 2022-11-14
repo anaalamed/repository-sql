@@ -66,34 +66,34 @@ public class SQLQuery<T> {
             return this;
         }
 
-        public <T> SQLQueryBuilder insertInto(T object) {
-            List<Field> fields = getClassFields(object.getClass());
-            ArrayList<String> values = new ArrayList<>();
-            ArrayList<String> keys = new ArrayList<>();
+        public <T> SQLQueryBuilder insertOne(T object) {
+            String[] keysValuesArr = getKeysValuesOfObject(object);
 
-            for (Field field : fields) {
-                keys.add(field.getName());
-
-                try {
-                    if (field.getType().isPrimitive() || isBoxedPrimitive(field.getType())) {
-                        values.add(field.get(object).toString());
-                    } else {
-                        Gson gson = new Gson();
-                        values.add(gson.toJson(field.get(object)));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            String valuesStr = String.join(", ", values);
-            String keysStr = String.join(", ", keys);
-
-            query = "INSERT INTO " + parseTableName(object.getClass()) + " (" + keysStr + ") "
-                    + "VALUES (" + valuesStr + ")";
+            query = "INSERT INTO " + parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") "
+                    + "VALUES (" + keysValuesArr[1] + ")";
 
             return this;
         }
+
+        public <T> SQLQueryBuilder insertMany(List<T> objects) {
+            String keys = "";
+            ArrayList<String> values = new ArrayList<>();
+
+            for (T object: objects) {
+                String[] keysValuesArr = getKeysValuesOfObject(object);
+                keys =  ("(" + keysValuesArr[0] + ")");
+                values.add("(" + keysValuesArr[1] + ")");
+            }
+
+            String valuesStr = String.join(", ", values);
+
+            query = "INSERT INTO " + parseTableName(objects.get(0).getClass()) + keys
+                    + "VALUES" + valuesStr;
+
+            return this;
+        }
+
+
 
         public SQLQuery build() {
             return new SQLQuery(this);
@@ -127,6 +127,31 @@ public class SQLQuery<T> {
                     .substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
 
             return FieldType.valueOf(fieldTypeValue).toString();
+        }
+
+        public static <T> String[] getKeysValuesOfObject(T object) {
+            List<Field> fields = getClassFields(object.getClass());
+            ArrayList<String> values = new ArrayList<>();
+            ArrayList<String> keys = new ArrayList<>();
+
+            for (Field field : fields) {
+                keys.add(field.getName());
+
+                try {
+                    if (field.getType().isPrimitive() || isBoxedPrimitive(field.getType())) {
+                        values.add(field.get(object).toString());
+                    } else {
+                        Gson gson = new Gson();
+                        values.add(gson.toJson(field.get(object)));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            String keysStr = String.join(", ", keys);
+            String valuesStr = String.join(", ", values);
+            return new String[]{keysStr, valuesStr};
         }
     }
 }

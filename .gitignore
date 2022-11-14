@@ -10,4 +10,4 @@
 log/
 target/
 
-*connectionData.json
+connectionData.json

@@ -56,7 +56,7 @@ public class Repository<T> {
     }
 
     public void insertOne(T object) {
-        String query = new SQLQuery.SQLQueryBuilder().insertInto(object).build().toString();
+        String query = new SQLQuery.SQLQueryBuilder().insertOne(object).build().toString();
 
         try {
             SQLConnection connection = SQLConnection.getInstance("connectionData.json");
@@ -68,6 +68,24 @@ public class Repository<T> {
             System.out.println("An Mysql drivers were not found");
         } catch (SQLException e) {
             System.out.println("An error has occurred on insertOne");
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void insertMany(List<T> objects) {
+        // new query for training
+        String query = new SQLQuery.SQLQueryBuilder().insertMany(objects).build().toString();
+
+        try {
+            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
+            Statement statement = connection.getConnection().createStatement();
+            statement.execute(query);
+            System.out.println("Items was successfully inserted");
+        }
+        catch (ClassNotFoundException e) {
+            System.out.println("An Mysql drivers were not found");
+        } catch (SQLException e) {
+            System.out.println("An error has occurred on insertMany");
             throw new RuntimeException(e);
         }
     }

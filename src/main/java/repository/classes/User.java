@@ -57,6 +57,8 @@ public class User {
     public String toString() {
         return "\nUser{" +
                 "id=" + id +
+                ", weight=" + weight +
+                ", isDeveloper=" + isDeveloper +
                 ", name='" + name + '\'' +
                 '}';
     }
