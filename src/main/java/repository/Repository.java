@@ -16,7 +16,8 @@ public class Repository<T> {
     }
 
 
-    public <T> List<T> executeQuery(String query) {
+    public List<T> getAll() {
+        String query = new SQLQuery.SQLQueryBuilder().select().from(clz).build().toString();
         List<T> results = null;
 
         try {
@@ -24,7 +25,6 @@ public class Repository<T> {
             Statement stmt = connection.getConnection().createStatement();
             ResultSet resultSet = stmt.executeQuery(query);
             results = (List<T>) extractResults(resultSet);
-//            connection.getConnection().close();
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -55,48 +55,22 @@ public class Repository<T> {
         return results;
     }
 
+    public void insertOne(T object) {
+        String query = new SQLQuery.SQLQueryBuilder().insertInto(object).build().toString();
 
-
-    public <T> void insertOne(T obj) {
         try {
-            // the mysql insert statement
             SQLConnection connection = SQLConnection.getInstance("connectionData.json");
-            Statement st = connection.getConnection().createStatement();
-
-            // create keysStr and valuesStr for query
-            ArrayList<String> values = new ArrayList<>();
-            ArrayList<String> keys = new ArrayList<>();
-
-            for (Field field : obj.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-
-                if (field.get(obj).getClass().getSimpleName().equals("Integer") ||
-                        field.get(obj).getClass().getSimpleName().equals("Double") ||
-                        field.get(obj).getClass().getSimpleName().equals("Float") ||
-                        field.get(obj).getClass().getSimpleName().equals("Boolean")) {
-                    values.add(field.get(obj).toString());
-                    keys.add(field.getName());
-                } else {
-                    values.add('"' + field.get(obj).toString() + '"');
-                    keys.add(field.getName());
-                }
-            }
-
-            String valuesStr = String.join(", ", values);
-            String keysStr = String.join(", ", keys);
-
-            String query = "INSERT INTO " + obj.getClass().getSimpleName() + " (" + keysStr + ") "
-                    + "VALUES (" + valuesStr + ")";
-
-            System.out.println(query);
-            st.execute(query);
-        } catch (Exception e) {
-            System.err.println("Got an exception!");
-            System.err.println(e.getMessage());
+            Statement statement = connection.getConnection().createStatement();
+            statement.execute(query);
+            System.out.println("Item was successfully inserted");
+        }
+        catch (ClassNotFoundException e) {
+            System.out.println("An Mysql drivers were not found");
+        } catch (SQLException e) {
+            System.out.println("An error has occurred on insertOne");
+            throw new RuntimeException(e);
         }
     }
-
-
 
     public void createTable() {
         String query = new SQLQuery.SQLQueryBuilder().createTable(clz).build().toString();
@@ -110,7 +84,7 @@ public class Repository<T> {
         catch (ClassNotFoundException e) {
             System.out.println("An Mysql drivers were not found");
         } catch (SQLException e) {
-            System.out.println("An error has occured on Table Creation");
+            System.out.println("An error has occurred on Table Creation");
             throw new RuntimeException(e);
         }
     }

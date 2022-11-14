@@ -1,9 +1,13 @@
 package repository;
 
+import com.google.gson.Gson;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+
+import static repository.FieldType.isBoxedPrimitive;
 
 public class SQLQuery<T> {
     private String query;
@@ -17,9 +21,8 @@ public class SQLQuery<T> {
         return query;
     }
 
-    public static class SQLQueryBuilder<T> {
+    public static class SQLQueryBuilder {
         private String query;
-
 
         public <T> SQLQueryBuilder createTable(Class<T> clz) {
             this.query = String.format("CREATE TABLE %s (", parseTableName(clz));
@@ -40,7 +43,7 @@ public class SQLQuery<T> {
         }
 
         public SQLQueryBuilder select() {
-            query += "SELECT *";
+            query = "SELECT *";
 
             return this;
         }
@@ -63,6 +66,35 @@ public class SQLQuery<T> {
             return this;
         }
 
+        public <T> SQLQueryBuilder insertInto(T object) {
+            List<Field> fields = getClassFields(object.getClass());
+            ArrayList<String> values = new ArrayList<>();
+            ArrayList<String> keys = new ArrayList<>();
+
+            for (Field field : fields) {
+                keys.add(field.getName());
+
+                try {
+                    if (field.getType().isPrimitive() || isBoxedPrimitive(field.getType())) {
+                        values.add(field.get(object).toString());
+                    } else {
+                        Gson gson = new Gson();
+                        values.add(gson.toJson(field.get(object)));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            String valuesStr = String.join(", ", values);
+            String keysStr = String.join(", ", keys);
+
+            query = "INSERT INTO " + parseTableName(object.getClass()) + " (" + keysStr + ") "
+                    + "VALUES (" + valuesStr + ")";
+
+            return this;
+        }
+
         public SQLQuery build() {
             return new SQLQuery(this);
         }
@@ -80,6 +112,7 @@ public class SQLQuery<T> {
                 Field[] declaredFields = clz.getDeclaredFields();
 
                 for (Field field : declaredFields) {
+                    field.setAccessible(true);
                     classFields.add(field);
                 }
             } catch (Exception e) {
