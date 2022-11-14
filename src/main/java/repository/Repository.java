@@ -3,7 +3,6 @@ package repository;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
@@ -20,8 +19,43 @@ public class Repository<T> {
         String query = new SQLQuery.SQLQueryBuilder().select().from(clz).build().toString();
         List<T> results = null;
 
-        try {
-            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
+        try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json")) {
+            Statement stmt = connection.getConnection().createStatement();
+            ResultSet resultSet = stmt.executeQuery(query);
+            results = (List<T>) extractResults(resultSet);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return results;
+    }
+
+    public T getById(int id) {
+        List<String> conditions = new ArrayList<>();
+        conditions.add("id = " + id);
+
+        String query = new SQLQuery.SQLQueryBuilder().select().from(clz).where(conditions).build().toString();
+        T result = null;
+
+        try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json")) {
+            Statement stmt = connection.getConnection().createStatement();
+            ResultSet resultSet = stmt.executeQuery(query);
+            result = (T) extractResults(resultSet).get(0);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return result;
+    }
+
+    public List<T> getByProperty(String propertyName, Object value) {
+        List<String> conditions = new ArrayList<>();
+        conditions.add(propertyName + " = \"" + value + "\"");
+
+        String query = new SQLQuery.SQLQueryBuilder().select().from(clz).where(conditions).build().toString();
+        List<T> results = null;
+
+        try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json")) {
             Statement stmt = connection.getConnection().createStatement();
             ResultSet resultSet = stmt.executeQuery(query);
             results = (List<T>) extractResults(resultSet);
@@ -58,34 +92,26 @@ public class Repository<T> {
     public void insertOne(T object) {
         String query = new SQLQuery.SQLQueryBuilder().insertInto(object).build().toString();
 
-        try {
-            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
+        try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json")) {
             Statement statement = connection.getConnection().createStatement();
             statement.execute(query);
             System.out.println("Item was successfully inserted");
         }
-        catch (ClassNotFoundException e) {
-            System.out.println("An Mysql drivers were not found");
-        } catch (SQLException e) {
-            System.out.println("An error has occurred on insertOne");
-            throw new RuntimeException(e);
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void createTable() {
         String query = new SQLQuery.SQLQueryBuilder().createTable(clz).build().toString();
 
-        try {
-            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
+        try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json")) {
             Statement statement = connection.getConnection().createStatement();
             statement.executeUpdate(query);
             System.out.println("Table Created");
         }
-        catch (ClassNotFoundException e) {
-            System.out.println("An Mysql drivers were not found");
-        } catch (SQLException e) {
-            System.out.println("An error has occurred on Table Creation");
-            throw new RuntimeException(e);
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -53,10 +53,10 @@ public class SQLQuery<T> {
             return this;
         }
 
-        public SQLQueryBuilder where(List<Boolean> conditions) {
+        public SQLQueryBuilder where(List<String> conditions) {
             query += " WHERE ";
             for (int i = 0; i < conditions.size(); i++) {
-                query += conditions.get(i).toString();
+                query += conditions.get(i);
 
                 if (i < conditions.size() - 1) {
                     query += " AND ";
@@ -103,7 +103,7 @@ public class SQLQuery<T> {
             return clz.getSimpleName().toLowerCase();
         }
 
-        private static <T> List<Field> getClassFields(Class<T> clz) {
+        public static <T> List<Field> getClassFields(Class<T> clz) {
             List<Field> classFields = new ArrayList<>();
 
             try {
