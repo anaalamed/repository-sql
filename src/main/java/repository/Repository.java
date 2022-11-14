@@ -9,35 +9,49 @@ import java.util.List;
 public class Repository<T> {
     private Class<T> clz;
 
-    public Repository(Class<T> clz) {
+
+    public Repository(Class<T> clz) throws SQLException, ClassNotFoundException {
         this.clz = clz;
     }
 
-    public <T> List<T> executeQuery( ) {
-        try {
-            Class.forName(("com.mysql.jdbc.Driver"));
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/test", "root", "1234" );
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery( "select * from user");
-            List<T> results = new ArrayList<>();
+    public <T> List<T> executeQuery(String query) {
+        List<T> results = null;
 
-            while( rs.next()) {
+        try {
+            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
+
+            Statement stmt = connection.getConnection().createStatement();
+            ResultSet resultSet = stmt.executeQuery(query);
+            results = (List<T>) extractResults(resultSet);
+
+            connection.getConnection().close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return results;
+    }
+
+    private List<T> extractResults(ResultSet resultSet) {
+        List<T> results = new ArrayList<>();
+
+        try {
+            while(resultSet.next()) {
                 Constructor <T> constructor = (Constructor<T>) clz.getConstructor(null);
                 T item = constructor.newInstance();
                 Field[] declaredFields = clz.getDeclaredFields();
 
-                for (Field field: declaredFields ) {
+                for (Field field: declaredFields) {
                     field.setAccessible(true);
-                    field.set(item, rs.getObject(field.getName()));
+                    field.set(item, resultSet.getObject(field.getName()));
                 }
-            results.add(item);
-            }
 
-            con.close();
-            return results;
-        } catch (Exception e) {
-            System.out.println(e);
+                results.add(item);
+            }
+        } catch (Exception ex) {
+            System.out.println(ex);
         }
-        return null;
+
+        return results;
     }
 }
