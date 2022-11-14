@@ -49,6 +49,10 @@ public class Main {
         users = userRepository.getByProperty("name", "lior");
         System.out.println(users);
 
+        System.out.println("\n------------------- update by property -----------------------------");
+        userRepository.updateByProperty("weight", 50, "id", 2);
+
+
         System.out.println("\n------------------- delete by property -----------------------------");
         userRepository.deleteByProperty("id", 1);
 

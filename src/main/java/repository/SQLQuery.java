@@ -53,6 +53,23 @@ public class SQLQuery {
             return this;
         }
 
+        public <T> SQLQueryBuilder set(List<String> updates) {
+
+            if (updates.size() == 0) {
+                return this;
+            }
+
+            query += " SET ";
+            for (int i = 0; i < updates.size(); i++) {
+                query += updates.get(i);
+
+                if (i < updates.size() - 1) {
+                    query += " AND ";
+                }
+            }
+            return this;
+        }
+
         public SQLQueryBuilder where(List<String> conditions) {
             if (conditions.size() == 0) {
                 return this;
@@ -100,6 +117,12 @@ public class SQLQuery {
 
         public SQLQueryBuilder delete() {
             query = "DELETE ";
+
+            return this;
+        }
+
+        public <T> SQLQueryBuilder update(Class<T> clz) {
+            query = " UPDATE " + parseTableName(clz);
 
             return this;
         }

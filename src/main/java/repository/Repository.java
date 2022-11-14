@@ -65,6 +65,17 @@ public class Repository<T> {
         update(query);
     }
 
+    public void updateByProperty(String propertyNameToUpdate, Object valueToUpdate, String propertyNameCondition, Object valueCondition) {
+        List<String> conditions = new ArrayList<>();
+        conditions.add(propertyNameCondition + " = \"" + valueCondition + "\"");
+
+        List<String> updates = new ArrayList<>();
+        updates.add(propertyNameToUpdate + " = \"" + valueToUpdate + "\"");
+
+        String query = new SQLQuery.SQLQueryBuilder().update(clz).set(updates).where(conditions).build().toString();
+        update(query);
+    }
+
     public void deleteTable() {
         String query = new SQLQuery.SQLQueryBuilder().dropTable(clz).build().toString();
         update(query);
@@ -74,7 +85,7 @@ public class Repository<T> {
         List<T> results = null;
 
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
-             Statement statement = connection.getConnection().createStatement()) {
+            Statement statement = connection.getConnection().createStatement()) {
             ResultSet resultSet = statement.executeQuery(query);
             results = (List<T>) extractResults(resultSet);
             System.out.println(String.format("%d rows in set", results.size()));
@@ -87,7 +98,7 @@ public class Repository<T> {
 
     public void update(String query) {
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
-             Statement statement = connection.getConnection().createStatement()) {
+            Statement statement = connection.getConnection().createStatement()) {
             int countEffectedRows = statement.executeUpdate(query);
             System.out.println(String.format("Query OK, %d row affected", countEffectedRows));
         } catch (Exception e) {
