@@ -20,8 +20,8 @@ public class Main {
 //         ------------------- create table -----------------------------
         Repository<Animal> animalRepository = new Repository<>(Animal.class);
         Repository<User> userRepository = new Repository<>(User.class);
-        userRepository.createTable();
-        animalRepository.createTable();
+//        userRepository.createTable();
+ //       animalRepository.createTable();
 
 //         ------------------- insert One -----------------------------
 

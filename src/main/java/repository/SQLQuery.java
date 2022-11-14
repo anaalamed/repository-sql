@@ -9,8 +9,8 @@ import java.util.List;
 
 import static repository.FieldType.isBoxedPrimitive;
 
-public class SQLQuery<T> {
-    private String query;
+public class SQLQuery {
+    private final String query;
 
     private SQLQuery(SQLQueryBuilder builder) {
         this.query = builder.query;
@@ -107,7 +107,7 @@ public class SQLQuery<T> {
             List<Field> classFields = new ArrayList<>();
 
             try {
-                Constructor<T> constructor = (Constructor<T>) clz.getConstructor(null);
+                Constructor<T> constructor = (Constructor<T>) clz.getConstructor();
                 T item = constructor.newInstance();
                 Field[] declaredFields = clz.getDeclaredFields();
 
