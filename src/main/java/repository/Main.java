@@ -1,22 +1,24 @@
 package repository;
 
+
 import repository.classExamples.Animal;
 import repository.classExamples.User;
 import repository.classExamples.Vehicle;
 
+
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws  ClassNotFoundException {
         System.out.println("Hello abadayy!");
 
-        // ------------------- User -----------------------------
-        Repository<User> userRepository = new Repository<>(User.class);
-        List<User> users = userRepository.getItems();
+        Repository repository = new Repository(User.class);
+        List users = repository.executeQuery("select * from user");
+
         System.out.println(users);
 
 
-        userRepository.insertOne(new User(10, "aaaa"));
+//        repository.insertOne(new User(10, "aaaa"));
 
 //        // ------------------- Animal -----------------------------
 //        Repository<Animal> animalRepository = new Repository<>(Animal.class);
