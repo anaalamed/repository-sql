@@ -2,9 +2,10 @@ package repository;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
 
 public class Repository<T> {
     private Class<T> clz;
@@ -14,6 +15,7 @@ public class Repository<T> {
         this.clz = clz;
     }
 
+
     public <T> List<T> executeQuery(String query) {
         List<T> results = null;
 
@@ -22,7 +24,7 @@ public class Repository<T> {
             Statement stmt = connection.getConnection().createStatement();
             ResultSet resultSet = stmt.executeQuery(query);
             results = (List<T>) extractResults(resultSet);
-            connection.getConnection().close();
+//            connection.getConnection().close();
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -35,7 +37,7 @@ public class Repository<T> {
 
         try {
             while(resultSet.next()) {
-                Constructor <T> constructor = (Constructor<T>) clz.getConstructor(null);
+                Constructor<T> constructor = (Constructor<T>) clz.getConstructor(null);
                 T item = constructor.newInstance();
                 Field[] declaredFields = clz.getDeclaredFields();
 
@@ -53,6 +55,49 @@ public class Repository<T> {
         return results;
     }
 
+
+
+    public <T> void insertOne(T obj) {
+        try {
+            // the mysql insert statement
+            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
+            Statement st = connection.getConnection().createStatement();
+
+            // create keysStr and valuesStr for query
+            ArrayList<String> values = new ArrayList<>();
+            ArrayList<String> keys = new ArrayList<>();
+
+            for (Field field : obj.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+
+                if (field.get(obj).getClass().getSimpleName().equals("Integer") ||
+                        field.get(obj).getClass().getSimpleName().equals("Double") ||
+                        field.get(obj).getClass().getSimpleName().equals("Float") ||
+                        field.get(obj).getClass().getSimpleName().equals("Boolean")) {
+                    values.add(field.get(obj).toString());
+                    keys.add(field.getName());
+                } else {
+                    values.add('"' + field.get(obj).toString() + '"');
+                    keys.add(field.getName());
+                }
+            }
+
+            String valuesStr = String.join(", ", values);
+            String keysStr = String.join(", ", keys);
+
+            String query = "INSERT INTO " + obj.getClass().getSimpleName() + " (" + keysStr + ") "
+                    + "VALUES (" + valuesStr + ")";
+
+            System.out.println(query);
+            st.execute(query);
+        } catch (Exception e) {
+            System.err.println("Got an exception!");
+            System.err.println(e.getMessage());
+        }
+    }
+
+
+
     public void createTable() {
         String query = new SQLQuery.SQLQueryBuilder().createTable(clz).build().toString();
 
@@ -62,12 +107,11 @@ public class Repository<T> {
             statement.executeUpdate(query);
             System.out.println("Table Created");
         }
-        catch (SQLException e ) {
-            System.out.println("An error has occured on Table Creation");
-            e.printStackTrace();
-        }
         catch (ClassNotFoundException e) {
             System.out.println("An Mysql drivers were not found");
+        } catch (SQLException e) {
+            System.out.println("An error has occured on Table Creation");
+            throw new RuntimeException(e);
         }
     }
 }
