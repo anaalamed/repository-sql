@@ -1,5 +1,4 @@
-package repository.classExamples;
-
+package repository.classes;
 import java.util.List;
 
 public class User {

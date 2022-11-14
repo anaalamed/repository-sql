@@ -1,4 +1,4 @@
-package repository.classExamples;
+package repository.classes;
 
 public class Vehicle {
     private int id;
