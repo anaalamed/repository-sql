@@ -11,6 +11,7 @@ public class User {
     private double weight;
     private boolean isDeveloper;
     private String name;
+//    private List<Animal> animals;
 
 
     public User(int id, double weight, boolean isDeveloper, String name) {
@@ -18,7 +19,7 @@ public class User {
         this.weight = weight;
         this.isDeveloper = isDeveloper;
         this.name = name;
-        //this.animals = animals;
+//        this.animals = animals;
     }
 
     public User() {

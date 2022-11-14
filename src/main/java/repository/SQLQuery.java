@@ -2,9 +2,9 @@ package repository;
 
 import com.google.gson.Gson;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static repository.FieldType.isBoxedPrimitive;
@@ -28,7 +28,7 @@ public class SQLQuery {
             this.query = String.format("CREATE TABLE %s (", parseTableName(clz));
 
             try {
-                List<Field> classFields = getClassFields(clz);
+                List<Field> classFields = ReflectionUtils.getClassFields(clz);
 
                 for (Field field : classFields) {
                     query += String.format("%s %s,", field.getName(), getFieldSQLType(field));
@@ -54,6 +54,10 @@ public class SQLQuery {
         }
 
         public SQLQueryBuilder where(List<String> conditions) {
+            if (conditions.size() == 0) {
+                return this;
+            }
+
             query += " WHERE ";
             for (int i = 0; i < conditions.size(); i++) {
                 query += conditions.get(i);
@@ -67,7 +71,7 @@ public class SQLQuery {
         }
 
         public <T> SQLQueryBuilder insertInto(T object) {
-            List<Field> fields = getClassFields(object.getClass());
+            List<Field> fields = ReflectionUtils.getClassFields(object.getClass());
             ArrayList<String> values = new ArrayList<>();
             ArrayList<String> keys = new ArrayList<>();
 
@@ -78,8 +82,8 @@ public class SQLQuery {
                     if (field.getType().isPrimitive() || isBoxedPrimitive(field.getType())) {
                         values.add(field.get(object).toString());
                     } else {
-                        Gson gson = new Gson();
-                        values.add(gson.toJson(field.get(object)));
+                        String jsonString = "\"" + new Gson().toJson(field.get(object)) + "\"";
+                        values.add(jsonString.replace("\"\"", "\""));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -95,6 +99,18 @@ public class SQLQuery {
             return this;
         }
 
+        public SQLQueryBuilder delete() {
+            query = "DELETE ";
+
+            return this;
+        }
+
+        public <T> SQLQueryBuilder dropTable(Class<T> clz) {
+            query = "DROP TABLE " + parseTableName(clz);
+
+            return this;
+        }
+
         public SQLQuery build() {
             return new SQLQuery(this);
         }
@@ -103,30 +119,14 @@ public class SQLQuery {
             return clz.getSimpleName().toLowerCase();
         }
 
-        public static <T> List<Field> getClassFields(Class<T> clz) {
-            List<Field> classFields = new ArrayList<>();
-
-            try {
-                Constructor<T> constructor = (Constructor<T>) clz.getConstructor();
-                T item = constructor.newInstance();
-                Field[] declaredFields = clz.getDeclaredFields();
-
-                for (Field field : declaredFields) {
-                    field.setAccessible(true);
-                    classFields.add(field);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return classFields;
-        }
-
         private String getFieldSQLType(Field field) {
             String fieldTypeValue = field.getType().toString()
                     .substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
 
-            return FieldType.valueOf(fieldTypeValue).toString();
+            boolean isSQLField = Arrays.stream(FieldType.values()).anyMatch((t) -> t.name().equals(fieldTypeValue));
+            String result = isSQLField ? FieldType.valueOf(fieldTypeValue).toString() : FieldType.OBJECT.toString();
+
+            return result;
         }
     }
 }
