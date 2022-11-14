@@ -8,7 +8,6 @@ public enum FieldType {
     BOOLEAN("BOOLEAN", 0),
     STRING("VARCHAR", 20);
 
-
     private final String text;
     private int size;
 
@@ -20,6 +19,7 @@ public enum FieldType {
     public void setSize(int size) {
         this.size = size;
     }
+
 
     @Override
     public String toString() {

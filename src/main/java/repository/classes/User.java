@@ -1,16 +1,16 @@
 package repository.classes;
-import repository.annotations.ColumnsRules;
+import repository.annotations.Constraints;
 import repository.annotations.PrimaryKey;
 
 import java.util.List;
 
 public class User {
-    @PrimaryKey(primaryKey = ColumnsRules.PRIMARY_KEY)
+    @PrimaryKey(primaryKey = Constraints.PRIMARY_KEY)
     private int id;
     private double weight;
     private boolean isDeveloper;
     private String name;
-    private List<Animal> animals;
+    //private List<Animal> animals;
 
 
     public User(int id, double weight, boolean isDeveloper, String name, List animals) {
@@ -18,7 +18,7 @@ public class User {
         this.weight = weight;
         this.isDeveloper = isDeveloper;
         this.name = name;
-        this.animals = animals;
+        //this.animals = animals;
     }
 
     public User() {

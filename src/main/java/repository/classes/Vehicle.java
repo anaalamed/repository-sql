@@ -1,8 +1,5 @@
 package repository.classes;
 
-import repository.annotations.ColumnsRules;
-import repository.annotations.PrimaryKey;
-
 public class Vehicle {
 
     private int id;

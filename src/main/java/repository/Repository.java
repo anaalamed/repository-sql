@@ -1,5 +1,7 @@
 package repository;
 
+import repository.annotations.Constraints;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -116,6 +118,12 @@ public class Repository<T> {
             System.out.println("An error has occured on Table Creation");
             throw new RuntimeException(e);
         }
+    }
+
+    private Map<Constraints,String> getAnnotationsFromField(Field field){
+        Map<Constraints,String> constraints = new HashMap<>();
+        
+        return constraints;
     }
 
 }

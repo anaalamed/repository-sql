@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NotNull {
-    ColumnsRules primaryKey() default ColumnsRules.NOT_NULL;
+    Constraints notNull() default Constraints.NOT_NULL;
 }
 

@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Unique {
-    ColumnsRules primaryKey() default ColumnsRules.UNIQUE;
+    Constraints unique() default Constraints.UNIQUE;
 }
