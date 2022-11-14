@@ -1,12 +1,21 @@
 package repository.classExamples;
 
+import java.util.List;
+
 public class User {
     private int id;
+    private double weight;
+    private boolean isDeveloper;
     private String name;
+    private List<Animal> animals;
 
-    public User(int id, String name) {
+
+    public User(int id, double weight, boolean isDeveloper, String name, List animals) {
         this.id = id;
+        this.weight = weight;
+        this.isDeveloper = isDeveloper;
         this.name = name;
+        this.animals = animals;
     }
 
     public User() {
@@ -26,6 +35,23 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
+
+    public boolean isDeveloper() {
+        return isDeveloper;
+    }
+
+    public void setDeveloper(boolean developer) {
+        isDeveloper = developer;
     }
 
     @Override

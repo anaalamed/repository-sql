@@ -2,12 +2,12 @@ package repository.classExamples;
 
 public class Animal {
     private int id;
-    private String name;
+    private String animalName;
     private double weight;
 
     public Animal(int id, String name, double weight) {
         this.id = id;
-        this.name = name;
+        this.animalName = name;
         this.weight = weight;
     }
 
@@ -23,11 +23,11 @@ public class Animal {
     }
 
     public String getName() {
-        return name;
+        return animalName;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.animalName = name;
     }
 
     public double getWeight() {
@@ -42,7 +42,7 @@ public class Animal {
     public String toString() {
         return "\nAnimal{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+                ", name='" + animalName + '\'' +
                 ", weight=" + weight +
                 '}';
     }

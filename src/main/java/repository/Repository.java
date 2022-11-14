@@ -4,10 +4,11 @@ import repository.classExamples.User;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Repository<T> {
     private Class<T> clz;
@@ -28,7 +29,7 @@ public class Repository<T> {
             ResultSet resultSet = stmt.executeQuery(query);
             results = (List<T>) extractResults(resultSet);
 
-            connection.getConnection().close();
+//            connection.getConnection().close();
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -60,8 +61,43 @@ public class Repository<T> {
     }
 
 
-//    public <T> void insertOne(User user) {
-//        SqlConnection mySqlConnection = new SqlConnection("test");
-//        mySqlConnection.insertOne(user);
-//    }
+
+    public <T> void insertOne(T obj) {
+        try {
+            // the mysql insert statement
+            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
+            Statement st = connection.getConnection().createStatement();
+
+            // create keysStr and valuesStr for query
+            ArrayList<String> values = new ArrayList<>();
+            ArrayList<String> keys = new ArrayList<>();
+
+            for (Field field: obj.getClass().getDeclaredFields() ) {
+                field.setAccessible(true);
+
+                if (field.get(obj).getClass().getSimpleName().equals("Integer") ||
+                    field.get(obj).getClass().getSimpleName().equals("Double") ||
+                    field.get(obj).getClass().getSimpleName().equals("Float") ||
+                    field.get(obj).getClass().getSimpleName().equals("Boolean")) {
+                    values.add(field.get(obj).toString());
+                    keys.add(field.getName());
+                } else {
+                    values.add('"' + field.get(obj).toString()+ '"');
+                    keys.add(field.getName());
+                }
+            }
+
+            String valuesStr = String.join(", ", values);
+            String keysStr = String.join(", ", keys);
+
+            String query = "INSERT INTO "+obj.getClass().getSimpleName()+" ("+keysStr+") "
+                    +"VALUES ("+valuesStr+")";
+
+            System.out.println(query);
+            st.execute(query);
+        } catch (Exception e) {
+            System.err.println("Got an exception!");
+            System.err.println(e.getMessage());
+        }
+    }
 }

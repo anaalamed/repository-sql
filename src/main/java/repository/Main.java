@@ -6,6 +6,7 @@ import repository.classExamples.User;
 import repository.classExamples.Vehicle;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -18,7 +19,11 @@ public class Main {
         System.out.println(users);
 
 
-//        repository.insertOne(new User(10, "aaaa"));
+        ArrayList<Animal> animals = new ArrayList<>();
+        animals.add(new Animal(1, "bbb", 2.0));
+        animals.add(new Animal(2, "ccc", 2.0));
+
+        repository.insertOne(new User(23, 2.34, false, "aaaa", animals));
 
 //        // ------------------- Animal -----------------------------
 //        Repository<Animal> animalRepository = new Repository<>(Animal.class);
