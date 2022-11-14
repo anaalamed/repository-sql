@@ -2,8 +2,11 @@ package repository;
 
 import com.google.gson.Gson;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,9 +34,10 @@ public class SQLQuery {
                 List<Field> classFields = getClassFields(clz);
 
                 for (Field field : classFields) {
-                    query += String.format("%s %s,", field.getName(), getFieldSQLType(field));
+                    query += String.format("%s %s %s,", field.getName(), getFieldSQLType(field),getAnnotationsFromField(field));
                 }
-
+                System.out.println(query);
+                System.out.println(query.substring(0, query.length() - 1));
                 query = query.substring(0, query.length() - 1) + ")";
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -127,6 +131,29 @@ public class SQLQuery {
                     .substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
 
             return FieldType.valueOf(fieldTypeValue).toString();
+        }
+
+
+
+        private String getAnnotationsFromField(Field field) {
+
+            StringBuilder constraints = new StringBuilder();
+            try{
+                Annotation[] annotations = field.getAnnotations();
+
+                for (Annotation annotation:annotations) {
+                    Class<? extends Annotation> type = annotation.annotationType();
+                    Method[] methods= type.getDeclaredMethods();
+                    for (Method method : methods) {
+                        Object value = method.invoke(annotation, (Object[])null);
+                        constraints.append(value).append(" ");
+                    }
+                }
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+            return constraints.toString();
         }
     }
 }

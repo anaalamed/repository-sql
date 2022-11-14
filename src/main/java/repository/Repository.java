@@ -1,9 +1,13 @@
 package repository;
 
 import repository.annotations.Constraints;
+import repository.classes.User;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
@@ -75,7 +79,7 @@ public class Repository<T> {
 
         try {
             while (resultSet.next()) {
-                Constructor<T> constructor = (Constructor<T>) clz.getConstructor();
+                Constructor<T> constructor = clz.getConstructor();
                 T item = constructor.newInstance();
                 Field[] declaredFields = clz.getDeclaredFields();
 
@@ -110,15 +114,11 @@ public class Repository<T> {
 
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
              Statement statement = connection.getConnection().createStatement()) {
-            statement.executeUpdate(query);
-            System.out.println("Table Created");
+             statement.executeUpdate(query);
+             System.out.println("Table Created");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private Map<Constraints, String> getAnnotationsFromField(Field field) {
-        Map<Constraints, String> constraints = new HashMap<>();
-        return constraints;
-    }
 }

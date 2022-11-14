@@ -1,15 +1,21 @@
 package repository.classes;
 
 import repository.annotations.Constraints;
+import repository.annotations.NotNull;
 import repository.annotations.PrimaryKey;
+import repository.annotations.Unique;
 
 import java.util.List;
 
 public class User {
-    @PrimaryKey(primaryKey = Constraints.PRIMARY_KEY)
+    @PrimaryKey
+    @Unique
     private int id;
+
+    @NotNull
     private double weight;
     private boolean isDeveloper;
+    @NotNull
     private String name;
 
 
