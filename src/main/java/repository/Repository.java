@@ -14,7 +14,7 @@ public class Repository<T> {
         this.clz = clz;
     }
 
-    public <T> List<T> executeQuery(String query) {
+    public  List<T> executeQuery(String query) {
         List<T> results = null;
 
         try {
@@ -22,7 +22,7 @@ public class Repository<T> {
 
             Statement stmt = connection.getConnection().createStatement();
             ResultSet resultSet = stmt.executeQuery(query);
-            results = (List<T>) extractResults(resultSet);
+            results = extractResults(resultSet);
 
             connection.getConnection().close();
         } catch (Exception e) {
@@ -54,4 +54,7 @@ public class Repository<T> {
 
         return results;
     }
+
+
+
 }

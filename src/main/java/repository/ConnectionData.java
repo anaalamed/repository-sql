@@ -14,6 +14,6 @@ class ConnectionData {
     public ConnectionData() {
         this.databaseName = "test";
         this.user = "root";
-        this.password = "1234";
+        this.password = "uchihawa3";
     }
 }

@@ -1,6 +1,10 @@
 package repository;
 
+import repository.annotations.ColumnsRules;
+import repository.annotations.PrimaryKey;
+
 public class User {
+    @PrimaryKey(primaryKey = ColumnsRules.PRIMARY_KEY)
     private int id;
     private String name;
 
