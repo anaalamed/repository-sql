@@ -122,3 +122,6 @@ public class Repository<T> {
     }
 
 }
+
+//IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'accesslog')
+//    TRUNCATE accesslog
