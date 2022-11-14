@@ -12,26 +12,26 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 
-public class SQLConnection {
-    private static SQLConnection single_instance = null;
+public class SQLConnection2 {
+    private static SQLConnection2 single_instance = null;
     Connection connection;
 
-    private SQLConnection(String databaseName, String user, String password)
+    private SQLConnection2(String databaseName, String user, String password)
             throws SQLException, ClassNotFoundException {
         Class.forName("com.mysql.jdbc.Driver");
         this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + databaseName, user, password);
     }
 
-    public static SQLConnection getInstance(String databaseName, String user, String password)
+    public static SQLConnection2 getInstance(String databaseName, String user, String password)
             throws SQLException, ClassNotFoundException {
         if(single_instance == null) {
-            single_instance = new SQLConnection(databaseName, user, password);
+            single_instance = new SQLConnection2(databaseName, user, password);
         }
 
         return single_instance;
     }
 
-    public static SQLConnection getInstance(String filename) throws SQLException, ClassNotFoundException {
+    public static SQLConnection2 getInstance(String filename) throws SQLException, ClassNotFoundException {
         ConnectionData connectionData = parseConfigFile(filename);
         return getInstance(connectionData.databaseName, connectionData.user, connectionData.password);
     }
@@ -53,10 +53,4 @@ public class SQLConnection {
             return defaultData;
         }
     }
-
-
-
-
-
-
 }

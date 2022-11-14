@@ -1,14 +1,10 @@
 package repository;
 
-import repository.classExamples.User;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Repository<T> {
     private Class<T> clz;
@@ -23,7 +19,7 @@ public class Repository<T> {
         List<T> results = null;
 
         try {
-            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
+            SQLConnection2 connection = SQLConnection2.getInstance("connectionData.json");
 
             Statement stmt = connection.getConnection().createStatement();
             ResultSet resultSet = stmt.executeQuery(query);
@@ -65,7 +61,7 @@ public class Repository<T> {
     public <T> void insertOne(T obj) {
         try {
             // the mysql insert statement
-            SQLConnection connection = SQLConnection.getInstance("connectionData.json");
+            SQLConnection2 connection = SQLConnection2.getInstance("connectionData.json");
             Statement st = connection.getConnection().createStatement();
 
             // create keysStr and valuesStr for query
