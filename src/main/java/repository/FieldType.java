@@ -10,19 +10,20 @@ public enum FieldType {
     FLOAT("FLOAT", 16, 2),
     DOUBLE("DOUBLE", 16, 2),
     BOOLEAN("BOOLEAN", 0, 0),
-    STRING("VARCHAR", 20, 0),
-    LIST("VARCHAR", 200, 0);
+    STRING("VARCHAR", 50, 0),
+    LIST("TEXT", 1000, 0),
+    MAP("TEXT", 1000, 0),
+    OBJECT("TEXT", 1000, 0);
 
     private final String text;
-    private int size;
-    private int d;
+    private final int size;
+    private final int d;
 
     FieldType(final String text, int size, int d) {
         this.text = text;
         this.size = size;
         this.d = d;
     }
-
     @Override
     public String toString() {
         String result = text;

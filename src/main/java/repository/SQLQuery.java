@@ -2,15 +2,15 @@ package repository;
 
 import com.google.gson.Gson;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static repository.FieldType.isBoxedPrimitive;
 
-public class SQLQuery<T> {
-    private String query;
+public class SQLQuery {
+    private final String query;
 
     private SQLQuery(SQLQueryBuilder builder) {
         this.query = builder.query;
@@ -28,7 +28,7 @@ public class SQLQuery<T> {
             this.query = String.format("CREATE TABLE %s (", parseTableName(clz));
 
             try {
-                List<Field> classFields = getClassFields(clz);
+                List<Field> classFields = ReflectionUtils.getClassFields(clz);
 
                 for (Field field : classFields) {
                     query += String.format("%s %s,", field.getName(), getFieldSQLType(field));
@@ -54,6 +54,10 @@ public class SQLQuery<T> {
         }
 
         public SQLQueryBuilder where(List<String> conditions) {
+            if (conditions.size() == 0) {
+                return this;
+            }
+
             query += " WHERE ";
             for (int i = 0; i < conditions.size(); i++) {
                 query += conditions.get(i);
@@ -65,6 +69,7 @@ public class SQLQuery<T> {
 
             return this;
         }
+
 
         public <T> SQLQueryBuilder insertOne(T object) {
             String[] keysValuesArr = getKeysValuesOfObject(object);
@@ -93,7 +98,17 @@ public class SQLQuery<T> {
             return this;
         }
 
+        public SQLQueryBuilder delete() {
+            query = "DELETE ";
 
+            return this;
+        }
+
+        public <T> SQLQueryBuilder dropTable(Class<T> clz) {
+            query = "DROP TABLE " + parseTableName(clz);
+
+            return this;
+        }
 
         public SQLQuery build() {
             return new SQLQuery(this);
@@ -103,34 +118,18 @@ public class SQLQuery<T> {
             return clz.getSimpleName().toLowerCase();
         }
 
-        public static <T> List<Field> getClassFields(Class<T> clz) {
-            List<Field> classFields = new ArrayList<>();
-
-            try {
-                Constructor<T> constructor = (Constructor<T>) clz.getConstructor(null);
-                T item = constructor.newInstance();
-                Field[] declaredFields = clz.getDeclaredFields();
-
-                for (Field field : declaredFields) {
-                    field.setAccessible(true);
-                    classFields.add(field);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return classFields;
-        }
-
         private String getFieldSQLType(Field field) {
             String fieldTypeValue = field.getType().toString()
                     .substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
 
-            return FieldType.valueOf(fieldTypeValue).toString();
+            boolean isSQLField = Arrays.stream(FieldType.values()).anyMatch((t) -> t.name().equals(fieldTypeValue));
+            String result = isSQLField ? FieldType.valueOf(fieldTypeValue).toString() : FieldType.OBJECT.toString();
+
+            return result;
         }
 
         public static <T> String[] getKeysValuesOfObject(T object) {
-            List<Field> fields = getClassFields(object.getClass());
+            List<Field> fields = ReflectionUtils.getClassFields(object.getClass());
             ArrayList<String> values = new ArrayList<>();
             ArrayList<String> keys = new ArrayList<>();
 
