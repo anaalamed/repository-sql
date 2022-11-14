@@ -1,6 +1,7 @@
 package repository.classes;
 
 public class Vehicle {
+
     private int id;
     private String name;
 

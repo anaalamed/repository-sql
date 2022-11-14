@@ -14,15 +14,14 @@ public enum FieldType {
     LIST("VARCHAR", 200, 0);
 
     private final String text;
-    private int size;
-    private int d;
+    private final int size;
+    private final int d;
 
     FieldType(final String text, int size, int d) {
         this.text = text;
         this.size = size;
         this.d = d;
     }
-
     @Override
     public String toString() {
         String result = text;

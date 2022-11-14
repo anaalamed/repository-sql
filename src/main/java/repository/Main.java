@@ -1,20 +1,27 @@
 package repository;
 
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+
 import repository.classes.Animal;
 import repository.classes.User;
 
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws  ClassNotFoundException {
+
+    public static void main(String[] args) throws ClassNotFoundException {
         System.out.println("Hello abadayy!");
 
 //         ------------------- create table -----------------------------
         Repository<Animal> animalRepository = new Repository<>(Animal.class);
-        Repository<User> userRepository = new Repository(User.class);
-        userRepository.createTable();
-        animalRepository.createTable();
+        Repository<User> userRepository = new Repository<>(User.class);
+//        userRepository.createTable();
+ //       animalRepository.createTable();
 
 //         ------------------- insert One -----------------------------
 
