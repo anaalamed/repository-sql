@@ -24,32 +24,29 @@ public class SQLQuery {
     public static class SQLQueryBuilder {
         private String query;
 
-        public <T> SQLQueryBuilder createTable(Class<T> clz) {
-            this.query = String.format("CREATE TABLE %s (", parseTableName(clz));
-
-            try {
-                List<Field> classFields = ReflectionUtils.getClassFields(clz);
-
-                for (Field field : classFields) {
-                    query += String.format("%s %s,", field.getName(), getFieldSQLType(field));
-                }
-
-                query = query.substring(0, query.length() - 1) + ")";
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-
-            return this;
-        }
 
         public SQLQueryBuilder select() {
             query = "SELECT *";
+            return this;
+        }
 
+        public SQLQueryBuilder delete() {
+            query = "DELETE ";
             return this;
         }
 
         public <T> SQLQueryBuilder from(Class<T> clz) {
             query += " FROM " + parseTableName(clz);
+            return this;
+        }
+
+        public <T> SQLQueryBuilder update(Class<T> clz) {
+            query = " UPDATE " + parseTableName(clz);
+            return this;
+        }
+
+        public <T> SQLQueryBuilder dropTable(Class<T> clz) {
+            query = "DROP TABLE " + parseTableName(clz);
             return this;
         }
 
@@ -87,6 +84,28 @@ public class SQLQuery {
             return this;
         }
 
+        public SQLQuery build() {
+            return new SQLQuery(this);
+        }
+
+        // -------------- building dynamic query inside the methods -----------------
+        public <T> SQLQueryBuilder createTable(Class<T> clz) {
+            this.query = String.format("CREATE TABLE %s (", parseTableName(clz));
+
+            try {
+                List<Field> classFields = ReflectionUtils.getClassFields(clz);
+
+                for (Field field : classFields) {
+                    query += String.format("%s %s,", field.getName(), getFieldSQLType(field));
+                }
+
+                query = query.substring(0, query.length() - 1) + ")";
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
+            return this;
+        }
 
         public <T> SQLQueryBuilder insertOne(T object) {
             String[] keysValuesArr = getKeysValuesOfObject(object);
@@ -115,28 +134,8 @@ public class SQLQuery {
             return this;
         }
 
-        public SQLQueryBuilder delete() {
-            query = "DELETE ";
 
-            return this;
-        }
-
-        public <T> SQLQueryBuilder update(Class<T> clz) {
-            query = " UPDATE " + parseTableName(clz);
-
-            return this;
-        }
-
-        public <T> SQLQueryBuilder dropTable(Class<T> clz) {
-            query = "DROP TABLE " + parseTableName(clz);
-
-            return this;
-        }
-
-        public SQLQuery build() {
-            return new SQLQuery(this);
-        }
-
+        // --------------------------- help methods ---------------------------------
         private static <T> String parseTableName(Class<T> clz) {
             return clz.getSimpleName().toLowerCase();
         }
@@ -151,7 +150,7 @@ public class SQLQuery {
             return result;
         }
 
-        public static <T> String[] getKeysValuesOfObject(T object) {
+        private static <T> String[] getKeysValuesOfObject(T object) {
             List<Field> fields = ReflectionUtils.getClassFields(object.getClass());
             ArrayList<String> values = new ArrayList<>();
             ArrayList<String> keys = new ArrayList<>();
