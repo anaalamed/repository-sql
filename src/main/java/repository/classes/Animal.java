@@ -1,6 +1,7 @@
 package repository.classes;
 
 public class Animal {
+
     private int id;
     private String name;
     private String type;
@@ -12,5 +13,14 @@ public class Animal {
     }
 
     public Animal() {
+    }
+
+    @Override
+    public String toString() {
+        return "Animal{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                '}';
     }
 }
