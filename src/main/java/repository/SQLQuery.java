@@ -2,9 +2,8 @@ package repository;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class SQLQuery<T> {
     private String query;
@@ -26,10 +25,10 @@ public class SQLQuery<T> {
             this.query = String.format("CREATE TABLE %s (", parseTableName(clz));
 
             try {
-                Map<String, String> classFields = getClassFields(clz);
+                List<Field> classFields = getClassFields(clz);
 
-                for (Map.Entry<String, String> entry : classFields.entrySet()) {
-                    query += String.format("%s %s,", entry.getKey(), entry.getValue());
+                for (Field field : classFields) {
+                    query += String.format("%s %s,", field.getName(), getFieldSQLType(field));
                 }
 
                 query = query.substring(0, query.length() - 1) + ")";
@@ -72,8 +71,8 @@ public class SQLQuery<T> {
             return clz.getSimpleName().toLowerCase();
         }
 
-        private static <T> Map<String, String> getClassFields(Class<T> clz) {
-            Map<String, String> classFields = new HashMap<>();
+        private static <T> List<Field> getClassFields(Class<T> clz) {
+            List<Field> classFields = new ArrayList<>();
 
             try {
                 Constructor<T> constructor = (Constructor<T>) clz.getConstructor(null);
@@ -81,15 +80,20 @@ public class SQLQuery<T> {
                 Field[] declaredFields = clz.getDeclaredFields();
 
                 for (Field field : declaredFields) {
-                    String fieldTypeValue = field.getType().toString()
-                            .substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
-                    classFields.put(field.getName(), FieldType.valueOf(fieldTypeValue).toString());
+                    classFields.add(field);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
             return classFields;
+        }
+
+        private String getFieldSQLType(Field field) {
+            String fieldTypeValue = field.getType().toString()
+                    .substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
+
+            return FieldType.valueOf(fieldTypeValue).toString();
         }
     }
 }

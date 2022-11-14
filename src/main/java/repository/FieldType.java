@@ -1,17 +1,20 @@
 package repository;
 
 public enum FieldType {
-    INT("INT"),
-    FLOAT("FLOAT"),
-    BOOLEAN("BOOLEAN"),
-    STRING("VARCHAR");
+    INT("INT", 16),
+    INTEGER("INT", 16),
+    FLOAT("FLOAT", 16),
+    DOUBLE("DOUBLE", 16),
+    BOOLEAN("BOOLEAN", 0),
+    STRING("VARCHAR", 20);
+
 
     private final String text;
     private int size;
 
-    FieldType(final String text) {
+    FieldType(final String text, int size) {
         this.text = text;
-        this.size = 16;
+        this.size = size;
     }
 
     public void setSize(int size) {
@@ -20,6 +23,7 @@ public enum FieldType {
 
     @Override
     public String toString() {
-        return text + "(" + size + ")";
+        String result = (size == 0) ? text : text + "(" + size + ")";
+        return result;
     }
 }
