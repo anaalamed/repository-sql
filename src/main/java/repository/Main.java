@@ -1,15 +1,9 @@
 package repository;
 
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-
 import repository.classes.Animal;
 import repository.classes.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -20,12 +14,16 @@ public class Main {
 //         ------------------- create table -----------------------------
         Repository<Animal> animalRepository = new Repository<>(Animal.class);
         Repository<User> userRepository = new Repository<>(User.class);
-//        userRepository.createTable();
- //       animalRepository.createTable();
+        userRepository.createTable();
+        animalRepository.createTable();
 
 //         ------------------- insert One -----------------------------
+//        List<Animal> animals = new ArrayList<>();
+//        animals.add(new Animal(3));
+//        animals.add(new Animal(5));
 
         userRepository.insertOne(new User(1, 1.9999, false, "ana"));
+        userRepository.insertOne(new User(1, 3.12, true, "khaled"));
         userRepository.insertOne(new User(2, 1.9999, true, "lior"));
 
 //         ------------------- get all -----------------------------
@@ -41,5 +39,12 @@ public class Main {
         System.out.println(users);
         users = userRepository.getByProperty("name", "lior");
         System.out.println(users);
+
+//         ------------------- delete by property -----------------------------
+        userRepository.deleteByProperty("id", 1);
+
+//         ------------------- delete table -----------------------------
+        userRepository.deleteTable();
+        animalRepository.deleteTable();
     }
 }
