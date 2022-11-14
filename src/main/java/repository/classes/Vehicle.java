@@ -1,19 +1,19 @@
-package repository;
+package repository.classes;
 
 import repository.annotations.ColumnsRules;
 import repository.annotations.PrimaryKey;
 
-public class User {
-    @PrimaryKey(primaryKey = ColumnsRules.PRIMARY_KEY)
+public class Vehicle {
+
     private int id;
     private String name;
 
-    public User(int id, String name) {
+    public Vehicle(int id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public User() {
+    public Vehicle() {
     }
 
     public int getId() {
@@ -30,13 +30,5 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public String toString() {
-        return "\nUser{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
     }
 }
