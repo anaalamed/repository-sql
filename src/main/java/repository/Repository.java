@@ -1,5 +1,7 @@
 package repository;
 
+import repository.classExamples.User;
+
 import java.util.List;
 
 public class Repository<T> {
@@ -10,7 +12,12 @@ public class Repository<T> {
     }
 
     public <T> List<T> getItems() {
-        SqlConnection mySqlConnection = new SqlConnection();
+        SqlConnection mySqlConnection = new SqlConnection("test");
         return mySqlConnection.getItems(clz);
+    }
+
+    public <T> void insertOne(User user) {
+        SqlConnection mySqlConnection = new SqlConnection("test");
+        mySqlConnection.insertOne(user);
     }
 }

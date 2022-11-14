@@ -2,6 +2,7 @@ package repository;
 
 import repository.classExamples.Animal;
 import repository.classExamples.User;
+import repository.classExamples.Vehicle;
 
 import java.util.List;
 
@@ -14,9 +15,18 @@ public class Main {
         List<User> users = userRepository.getItems();
         System.out.println(users);
 
-        // ------------------- Animal -----------------------------
-        Repository<Animal> animalRepository = new Repository<>(Animal.class);
-        List<User> animals = animalRepository.getItems();
-        System.out.println(animals);
+
+        userRepository.insertOne(new User(10, "aaaa"));
+
+//        // ------------------- Animal -----------------------------
+//        Repository<Animal> animalRepository = new Repository<>(Animal.class);
+//        List<User> animals = animalRepository.getItems();
+//        System.out.println(animals);
+
+
+
+        // ------------------- Vehicle -----------------------------
+//        Repository<Vehicle> vehicleRepository = new Repository<>(Vehicle.class);
+//        vehicleRepository.createTable();
     }
 }
