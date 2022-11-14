@@ -1,4 +1,5 @@
 package repository.classes;
+
 import repository.annotations.Constraints;
 import repository.annotations.PrimaryKey;
 
@@ -10,10 +11,9 @@ public class User {
     private double weight;
     private boolean isDeveloper;
     private String name;
-    //private List<Animal> animals;
 
 
-    public User(int id, double weight, boolean isDeveloper, String name, List animals) {
+    public User(int id, double weight, boolean isDeveloper, String name) {
         this.id = id;
         this.weight = weight;
         this.isDeveloper = isDeveloper;
@@ -59,8 +59,10 @@ public class User {
 
     @Override
     public String toString() {
-        return "\nUser{" +
+        return "User{" +
                 "id=" + id +
+                ", weight=" + weight +
+                ", isDeveloper=" + isDeveloper +
                 ", name='" + name + '\'' +
                 '}';
     }

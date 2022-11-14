@@ -1,5 +1,6 @@
 package repository;
 
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -9,38 +10,36 @@ import java.util.ArrayList;
 import repository.classes.Animal;
 import repository.classes.User;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws NoSuchFieldException, InvocationTargetException, IllegalAccessException {
-        // ------------------- get all -----------------------------
+
+    public static void main(String[] args) throws ClassNotFoundException {
         System.out.println("Hello abadayy!");
+
+//         ------------------- create table -----------------------------
+        Repository<Animal> animalRepository = new Repository<>(Animal.class);
         Repository<User> userRepository = new Repository<>(User.class);
-        List<User> users = userRepository.executeQuery("select * from user");
+        userRepository.createTable();
+        animalRepository.createTable();
+
+//         ------------------- insert One -----------------------------
+
+        userRepository.insertOne(new User(1, 1.9999, false, "ana"));
+        userRepository.insertOne(new User(2, 1.9999, true, "lior"));
+
+//         ------------------- get all -----------------------------
+        List<User> users = userRepository.getAll();
         System.out.println(users);
+
+//         ------------------- get by id -----------------------------
+        User user = userRepository.getById(2);
+        System.out.println(user);
+
+//         ------------------- get by property -----------------------------
+        users = userRepository.getByProperty("id", 1);
         System.out.println(users);
-
-//        // ------------------- insert One -----------------------------
-//        ArrayList<Animal> animals = new ArrayList<>();
-//        animals.add(new Animal(1));
-//        animals.add(new Animal(2));
-//        userRepository.insertOne(new User(24, 2.34, false, "aaaa", animals));
-
-//        // ------------------- create table -----------------------------
-//        Repository<Animal> repository = new Repository<>(Animal.class);
-//        repository.createTable();
-//
-//        Field idPrimary = User.class.getDeclaredField("id");
-//        Annotation[] annotations = idPrimary.getAnnotations();
-//        Class<? extends Annotation> type = annotations[0].annotationType();
-//        System.out.println("Values of " + type.getName());
-//        for (Method method : type.getDeclaredMethods()) {
-//            Object value = method.invoke(annotations[0], (Object[])null);
-//            System.out.println(" " + method.getName() + ": " + value);
-//        }
-
-
-
+        users = userRepository.getByProperty("name", "lior");
+        System.out.println(users);
     }
 }

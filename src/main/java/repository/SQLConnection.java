@@ -12,8 +12,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 
-public class SQLConnection {
-    private static SQLConnection single_instance = null;
+public class SQLConnection implements AutoCloseable {
     Connection connection;
 
     private SQLConnection(String databaseName, String user, String password)
@@ -22,18 +21,9 @@ public class SQLConnection {
         this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + databaseName, user, password);
     }
 
-    public static SQLConnection getInstance(String databaseName, String user, String password)
-            throws SQLException, ClassNotFoundException {
-        if(single_instance == null) {
-            single_instance = new SQLConnection(databaseName, user, password);
-        }
-
-        return single_instance;
-    }
-
-    public static SQLConnection getInstance(String filename) throws SQLException, ClassNotFoundException {
+    public static SQLConnection createSQLConnection(String filename) throws SQLException, ClassNotFoundException {
         ConnectionData connectionData = parseConfigFile(filename);
-        return getInstance(connectionData.databaseName, connectionData.user, connectionData.password);
+        return new SQLConnection(connectionData.databaseName, connectionData.user, connectionData.password);
     }
 
     public Connection getConnection() {
@@ -52,5 +42,10 @@ public class SQLConnection {
             FileUtils.writeObjectToJsonFile(filename, defaultData);
             return defaultData;
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        connection.close();
     }
 }
