@@ -71,7 +71,7 @@ public class SQLQuery {
             return this;
         }
 
-        public <T> SQLQueryBuilder set(List<String> updates) {
+        public SQLQueryBuilder set(List<String> updates) {
             logger.info("in SQLQueryBuilder.set()");
 
             if (updates.size() == 0) {
@@ -132,12 +132,10 @@ public class SQLQuery {
         public <T> SQLQueryBuilder insertOne(T object) {
             logger.info("in SQLQueryBuilder.insertOne()");
 
-            String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
+            List<T> wrappingList = new ArrayList<>();
+            wrappingList.add(object);
 
-            query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") "
-                    + "VALUES (" + keysValuesArr[1] + ")";
-
-            return this;
+            return insertMany(wrappingList);
         }
 
         public <T> SQLQueryBuilder insertMany(List<T> objects) {
@@ -148,14 +146,14 @@ public class SQLQuery {
 
             for (T object: objects) {
                 String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
-                keys =  ("(" + keysValuesArr[0] + ")");
+                keys = ("(" + keysValuesArr[0] + ")");
                 values.add("(" + keysValuesArr[1] + ")");
             }
 
             String valuesStr = String.join(", ", values);
 
             query = "INSERT INTO " + ReflectionUtils.parseTableName(objects.get(0).getClass()) + keys
-                    + "VALUES" + valuesStr;
+                    + " VALUES" + valuesStr;
 
             return this;
         }
