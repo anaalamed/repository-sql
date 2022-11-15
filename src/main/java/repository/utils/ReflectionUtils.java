@@ -1,8 +1,7 @@
 package repository.utils;
 
 import com.google.gson.Gson;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 import repository.FieldType;
 import repository.annotations.Constraints;
 
@@ -19,9 +18,6 @@ import java.util.Map;
 import static repository.FieldType.isBoxedPrimitive;
 
 public class ReflectionUtils {
-
-    private final static Logger logger = LogManager.getLogger(ReflectionUtils.class.getName());
-
     public static <T> List<Field> getClassFields(Class<T> clz) {
         List<Field> classFields = new ArrayList<>();
 
@@ -61,23 +57,12 @@ public class ReflectionUtils {
 
         for (Field field : fields) {
             keys.add(field.getName());
-
-            try {
-                if (field.getType().isPrimitive() || isBoxedPrimitive(field.getType())) {
-                    values.add(field.get(object).toString());
-                } else {
-                    Gson gson = new Gson();
-                    values.add(gson.toJson(field.get(object)));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            values.add(extractFieldValue(object, field));
         }
 
         String keysStr = String.join(", ", keys);
         String valuesStr = String.join(", ", values);
         return new String[]{keysStr, valuesStr};
-
     }
 
 
@@ -94,11 +79,11 @@ public class ReflectionUtils {
                     Object value = method.invoke(annotation, (Object[]) null);
 
                     if (value != null) {
-                        Constraints val =((Constraints) value);
+                        Constraints val = ((Constraints) value);
                         if (!annotationsCountByType.containsKey(val)) {
-                           annotationsCountByType.put(val,1);
-                        }else{
-                            annotationsCountByType.put(val,annotationsCountByType.get(val)+1);
+                            annotationsCountByType.put(val, 1);
+                        } else {
+                            annotationsCountByType.put(val, annotationsCountByType.get(val) + 1);
                         }
                         constraints.append(value).append(" ");
                     }
@@ -109,5 +94,33 @@ public class ReflectionUtils {
         }
 
         return constraints.toString();
+    }
+
+
+
+    private static <T> String extractFieldValue(T object, Field field) {
+        String value = null;
+
+        try {
+            if (field.getType().isPrimitive() || isBoxedPrimitive(field.getType())) {
+                value = field.get(object).toString();
+            } else {
+                Gson gson = new Gson();
+                value = gson.toJson(field.get(object));
+
+                if (!field.getType().getSimpleName().equals("String")) {
+                    value = value.replace("\"", "\\\"").replace("\'", "\\\'");
+                    value = String.format("\"%s\"", value);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return value;
+    }
+
+    public static boolean isComplexObject(Class<?> clz) {
+        return (!clz.isPrimitive() && !isBoxedPrimitive(clz) && !clz.getSimpleName().equals("String"));
     }
 }

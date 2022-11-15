@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class SQLQuery {
     private final String query;
 
@@ -29,36 +30,49 @@ public class SQLQuery {
 
 
         public SQLQueryBuilder select() {
+            logger.info("in SQLQueryBuilder.select()");
+
             query = "SELECT *";
             return this;
         }
 
         public SQLQueryBuilder delete() {
+            logger.info("in SQLQueryBuilder.delete()");
+
             query = "DELETE ";
             return this;
         }
 
         public <T> SQLQueryBuilder from(Class<T> clz) {
+            logger.info("in SQLQueryBuilder.from()");
+
             query += " FROM " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
         public <T> SQLQueryBuilder update(Class<T> clz) {
+            logger.info("in SQLQueryBuilder.update()");
+
             query = " UPDATE " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
         public <T> SQLQueryBuilder dropTable(Class<T> clz) {
             query = "DROP TABLE IF EXISTS " + ReflectionUtils.parseTableName(clz);
+            logger.info("in SQLQueryBuilder.dropTable()");
+
             return this;
         }
 
         public <T> SQLQueryBuilder truncateTable(Class<T> clz) {
+            logger.info("in SQLQueryBuilder.truncateTable()");
+
             query = "TRUNCATE TABLE " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
-        public <T> SQLQueryBuilder set(List<String> updates) {
+        public SQLQueryBuilder set(List<String> updates) {
+            logger.info("in SQLQueryBuilder.set()");
 
             if (updates.size() == 0) {
                 return this;
@@ -77,6 +91,8 @@ public class SQLQuery {
         }
 
         public SQLQueryBuilder where(List<String> conditions) {
+            logger.info("in SQLQueryBuilder.where()");
+
             if (conditions.size() == 0) {
                 return this;
             }
@@ -94,14 +110,12 @@ public class SQLQuery {
         }
 
 
-        public SQLQuery build() {
-            return new SQLQuery(this);
-        }
 
         // -------------- building dynamic query inside the methods -----------------
         public <T> SQLQueryBuilder createTableIfNotExists(Class<T> clz) {
             Map<Constraints, Integer> annotationsCountByType = new HashMap<>();
             StringBuilder createTableQuery = new StringBuilder(String.format("CREATE TABLE IF NOT EXISTS  %s (", ReflectionUtils.parseTableName(clz)));
+
 
             try {
                 List<Field> classFields = ReflectionUtils.getClassFields(clz);
@@ -121,16 +135,25 @@ public class SQLQuery {
 
 
         public <T> SQLQueryBuilder insertOne(T object) {
+
             logger.info("insertOne");
             String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
             logger.debug("values: " + keysValuesArr[1]);
             query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") " + "VALUES (" + keysValuesArr[1] + ")";
             query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") " + "VALUES (" + keysValuesArr[1] + ")";
 
-            return this;
+            logger.info("in SQLQueryBuilder.insertOne()");
+
+            List<T> wrappingList = new ArrayList<>();
+            wrappingList.add(object);
+
+
+            return insertMany(wrappingList);
         }
 
         public <T> SQLQueryBuilder insertMany(List<T> objects) {
+            logger.info("in SQLQueryBuilder.insertMany()");
+
             String keys = "";
             ArrayList<String> values = new ArrayList<>();
 
@@ -141,10 +164,18 @@ public class SQLQuery {
             }
 
             String valuesStr = String.join(", ", values);
+
             query = "INSERT INTO " + ReflectionUtils.parseTableName(objects.get(0).getClass()) + keys + "VALUES" + valuesStr;
 
             return this;
         }
+
+
+        public String build() {
+            return new SQLQuery(this).query;
+        }
+
+
     }
 }
 

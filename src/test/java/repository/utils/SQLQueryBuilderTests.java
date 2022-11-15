@@ -1,7 +1,8 @@
-package repository;
+package repository.utils;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import repository.SQLQuery;
 
 import java.util.ArrayList;
 import java.util.List;
