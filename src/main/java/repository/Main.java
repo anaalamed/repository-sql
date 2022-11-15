@@ -8,20 +8,19 @@ import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) throws ClassNotFoundException {
-        System.out.println("Hello abadayy!");
+    public static void main(String[] args) {
+        System.out.println("================= HELLO ABADAY! =================");
 
         System.out.println("------------------- create table -----------------------------");
         Repository<Animal> animalRepository = new Repository<>(Animal.class);
         Repository<User> userRepository = new Repository<>(User.class);
         userRepository.createTable();
-       animalRepository.createTable();
+        animalRepository.createTable();
 
         System.out.println("\n------------------- insert one -----------------------------");
         userRepository.insertOne(new User(1, 1.9999, false, "ana"));
         userRepository.insertOne(new User(2, 3.12, true, "khaled"));
         userRepository.insertOne(new User(3, 1.9999, true, "lior"));
-
 
 //        // check for List
 //        ArrayList<Animal> animalsForUser = new ArrayList<>();
@@ -46,7 +45,6 @@ public class Main {
         User user = userRepository.getById(2);
         System.out.println(user);
 
-
         System.out.println("\n------------------- get by property -----------------------------");
         users = userRepository.getByProperty("id", 1);
         System.out.println(users);
@@ -56,13 +54,14 @@ public class Main {
         System.out.println("\n------------------- update by property -----------------------------");
         userRepository.updateByProperty("weight", 50, "id", 2);
 
-
         System.out.println("\n------------------- delete by property -----------------------------");
         userRepository.deleteByProperty("id", 1);
 
+        System.out.println("\n------------------- truncate table -----------------------------");
+        userRepository.truncateTable();
 
         System.out.println("\n------------------- delete table -----------------------------");
-//        userRepository.deleteTable();
-//        animalRepository.deleteTable();
+        userRepository.dropTable();
+        animalRepository.dropTable();
     }
 }
