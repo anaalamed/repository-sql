@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
 public class SQLQuery {
     private final String query;
 
@@ -72,7 +71,7 @@ public class SQLQuery {
             return this;
         }
 
-        public <T> SQLQueryBuilder set(List<String> updates) {
+        public SQLQueryBuilder set(List<String> updates) {
             logger.info("in SQLQueryBuilder.set()");
 
             if (updates.size() == 0) {

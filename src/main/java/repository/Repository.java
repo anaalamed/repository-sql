@@ -45,7 +45,8 @@ public class Repository<T> {
         logger.info("in getById()");
 
         List<T> results = getByProperty("id", id);
-        return results.get(0);
+        T result = results.size() == 0 ? null : results.get(0);
+        return result;
     }
 
     public List<T> getByProperty(String propertyName, Object value) {
