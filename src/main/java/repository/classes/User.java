@@ -1,31 +1,36 @@
 package repository.classes;
 
-import repository.annotations.Constraints;
-import repository.annotations.NotNull;
-import repository.annotations.PrimaryKey;
-import repository.annotations.Unique;
+import repository.annotations.*;
 
 import java.util.List;
 
 public class User {
     @PrimaryKey
     @Unique
+
+    @Auto_Increment
     private int id;
 
-    @NotNull
+
     private double weight;
     private boolean isDeveloper;
     @NotNull
     private String name;
-//    private List<Animal> animals;
-
+    private List<Animal> animals;
 
     public User(int id, double weight, boolean isDeveloper, String name) {
         this.id = id;
         this.weight = weight;
         this.isDeveloper = isDeveloper;
         this.name = name;
-//        this.animals = animals;
+    }
+
+    public User(int id, double weight, boolean isDeveloper, String name, List<Animal> animals) {
+        this.id = id;
+        this.weight = weight;
+        this.isDeveloper = isDeveloper;
+        this.name = name;
+        this.animals = animals;
     }
 
     public User() {
@@ -58,6 +63,14 @@ public class User {
 
     public boolean isDeveloper() {
         return isDeveloper;
+    }
+
+    public List<Animal> getAnimals() {
+        return animals;
+    }
+
+    public void setAnimals(List<Animal> animals) {
+        this.animals = animals;
     }
 
     public void setDeveloper(boolean developer) {

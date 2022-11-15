@@ -1,5 +1,9 @@
 package repository;
 
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -9,12 +13,32 @@ import java.util.*;
 public class Repository<T> {
     private final Class<T> clz;
 
+
+    private static Logger logger = LogManager.getLogger(Repository.class.getName());
+
+
+
+
     public Repository(Class<T> clz) {
         this.clz = clz;
     }
 
+    public void createTable() {
+        String query = new SQLQuery.SQLQueryBuilder().createTable(clz).build().toString();
+
+        try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
+             Statement statement = connection.getConnection().createStatement()) {
+            System.out.println(query);
+            statement.executeUpdate(query);
+            System.out.println("Table Created");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public List<T> getAll() {
         String query = new SQLQuery.SQLQueryBuilder().select().from(clz).build().toString();
+        logger.debug("query: " + query);
         return select(query);
     }
 
@@ -27,8 +51,24 @@ public class Repository<T> {
         List<String> conditions = new ArrayList<>();
         conditions.add(propertyName + " = \"" + value + "\"");
         String query = new SQLQuery.SQLQueryBuilder().select().from(clz).where(conditions).build().toString();
+        logger.debug("query: " + query);
 
         return select(query);
+    }
+
+    public void insertOne(T object) {
+        logger.info("insertOne");
+        String query = new SQLQuery.SQLQueryBuilder().insertOne(object).build().toString();
+        logger.debug("query: " + query);
+        update(query);
+    }
+
+    public void insertMany(List<T> objects) {
+        // new query for training
+        logger.info("insertMany");
+        String query = new SQLQuery.SQLQueryBuilder().insertMany(objects).build().toString();
+        logger.debug("query: " + query);
+        update(query);
     }
 
 
@@ -37,19 +77,35 @@ public class Repository<T> {
         conditions.add(propertyName + " = \"" + value + "\"");
 
         String query = new SQLQuery.SQLQueryBuilder().delete().from(clz).where(conditions).build().toString();
+        logger.debug("query: " + query);
+        update(query);
+    }
+
+    public void updateByProperty(String propertyNameToUpdate, Object valueToUpdate, String propertyNameCondition, Object valueCondition) {
+        List<String> conditions = new ArrayList<>();
+        conditions.add(propertyNameCondition + " = \"" + valueCondition + "\"");
+
+        List<String> updates = new ArrayList<>();
+        updates.add(propertyNameToUpdate + " = \"" + valueToUpdate + "\"");
+
+        String query = new SQLQuery.SQLQueryBuilder().update(clz).set(updates).where(conditions).build().toString();
+        logger.debug("query: " + query);
         update(query);
     }
 
     public void deleteTable() {
         String query = new SQLQuery.SQLQueryBuilder().dropTable(clz).build().toString();
+        logger.debug("query: " + query);
         update(query);
     }
 
+
+    // --------------------------- help methods ---------------------------------
     public List<T> select(String query) {
         List<T> results = null;
 
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
-             Statement statement = connection.getConnection().createStatement()) {
+            Statement statement = connection.getConnection().createStatement()) {
             ResultSet resultSet = statement.executeQuery(query);
             results = (List<T>) extractResults(resultSet);
             System.out.printf("%d rows in set%n", results.size());
@@ -62,7 +118,7 @@ public class Repository<T> {
 
     public void update(String query) {
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
-             Statement statement = connection.getConnection().createStatement()) {
+            Statement statement = connection.getConnection().createStatement()) {
             int countEffectedRows = statement.executeUpdate(query);
             System.out.printf("Query OK, %d row affected%n", countEffectedRows);
         } catch (Exception e) {
@@ -91,32 +147,6 @@ public class Repository<T> {
         }
 
         return results;
-    }
-
-    public void insertOne(T object) {
-        String query = new SQLQuery.SQLQueryBuilder().insertInto(object).build().toString();
-
-        try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
-             Statement statement = connection.getConnection().createStatement()) {
-            statement.execute(query);
-            System.out.println("Item was successfully inserted");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    public void createTable() {
-        String query = new SQLQuery.SQLQueryBuilder().createTable(clz).build().toString();
-
-        try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
-             Statement statement = connection.getConnection().createStatement()) {
-            System.out.println(query);
-            statement.executeUpdate(query);
-            System.out.println("Table Created");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 }
