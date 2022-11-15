@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 public class SQLQuery {
     private final String query;
 
@@ -132,10 +133,8 @@ public class SQLQuery {
         public <T> SQLQueryBuilder insertOne(T object) {
             logger.info("in SQLQueryBuilder.insertOne()");
 
-            String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
-
-            query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") "
-                    + "VALUES (" + keysValuesArr[1] + ")";
+            query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + ReflectionUtils.createKeysStringForQuery(object)
+                    + "VALUES " + ReflectionUtils.createValuesStringForQuery(object);
 
             return this;
         }
@@ -143,18 +142,14 @@ public class SQLQuery {
         public <T> SQLQueryBuilder insertMany(List<T> objects) {
             logger.info("in SQLQueryBuilder.insertMany()");
 
-            String keys = "";
             ArrayList<String> values = new ArrayList<>();
-
             for (T object: objects) {
-                String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
-                keys =  ("(" + keysValuesArr[0] + ")");
-                values.add("(" + keysValuesArr[1] + ")");
+                values.add( ReflectionUtils.createValuesStringForQuery(object) );
             }
 
             String valuesStr = String.join(", ", values);
 
-            query = "INSERT INTO " + ReflectionUtils.parseTableName(objects.get(0).getClass()) + keys
+            query = "INSERT INTO " + ReflectionUtils.parseTableName(objects.get(0).getClass()) + ReflectionUtils.createKeysStringForQuery(objects.get(0))
                     + "VALUES" + valuesStr;
 
             return this;

@@ -3,6 +3,7 @@ package repository;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import repository.utils.ReflectionUtils;
 import repository.utils.SQLConnection;
 
 import java.lang.reflect.Constructor;
@@ -58,18 +59,40 @@ public class Repository<T> {
         return executeSelectQuery(query);
     }
 
-    public void insertOne(T object) {
+    public T insertOne(T object) {
         logger.info("in insertOne()");
         String query = new SQLQuery.SQLQueryBuilder().insertOne(object).build();
         logger.debug("Executing query: " + query);
         executeUpdateQuery(query);
+
+        // get inserted entity
+//        List<T> entities = getAddedEntity(object);
+//        if ( entities == null || entities.size() == 0) {
+//            throw new NullPointerException("Entity wasn't added");
+//        }
+//        T entityAdded = entities.get(0);                               // suppose there are no the same items
+//        logger.debug("Inserted entity: " + entityAdded);
+        return getAddedEntity(object);
     }
 
-    public void insertMany(List<T> objects) {
+    public List<T> insertMany(List<T> objects) {
         logger.info("in insertMany()");
         String query = new SQLQuery.SQLQueryBuilder().insertMany(objects).build();
         logger.debug("Executing query: " + query);
         executeUpdateQuery(query);
+
+        // get inserted entities
+        List<T> insertedEntities = new ArrayList<>();
+        for (T object: objects) {
+            insertedEntities.add(getAddedEntity(object));
+//            List<T> entities = getAddedEntity(object);
+//            if ( entities == null || entities.size() == 0) {
+//                throw new NullPointerException("One or more entities weren't added");
+//            }
+//            insertedEntities.add(entities.get(0));                        // suppose there are no the same items
+        }
+        logger.debug("Inserted entities: " + insertedEntities);
+        return insertedEntities;
     }
 
     public void deleteByProperty(String propertyName, Object value) {
@@ -114,7 +137,10 @@ public class Repository<T> {
         executeUpdateQuery(query);
     }
 
-    public List<T> executeSelectQuery(String query) {
+
+
+    // -------------------- help methods ------------------------------
+    private List<T> executeSelectQuery(String query) {
         List<T> results = null;
 
         try (SQLConnection connection = SQLConnection.createSQLConnection(this.CONFIGURATION_FILENAME);
@@ -133,7 +159,7 @@ public class Repository<T> {
         return results;
     }
 
-    public void executeUpdateQuery(String query) {
+    private void executeUpdateQuery(String query) {
         try (SQLConnection connection = SQLConnection.createSQLConnection(this.CONFIGURATION_FILENAME);
              Statement statement = connection.getConnection().createStatement()) {
             int countEffectedRows = statement.executeUpdate(query);
@@ -172,6 +198,27 @@ public class Repository<T> {
         }
 
         return results;
+    }
+
+    private T getAddedEntity(T object) {
+        logger.info("in getAddedEntity()");
+        Map<String,String> mapKeysValues = ReflectionUtils.getMapKeysValuesOfObject(object);
+        List<String> conditions = new ArrayList<>();
+        for (String key: mapKeysValues.keySet() ) {
+            conditions.add(key + " = " + mapKeysValues.get(key) );
+        }
+
+        String getQuery = new SQLQuery.SQLQueryBuilder().select().from(object.getClass()).where(conditions).build();
+        logger.debug(getQuery);
+
+        List<T> entities = executeSelectQuery(getQuery);
+        if ( entities == null || entities.size() == 0) {
+            logger.error("Entity wasn't added");
+            throw new NullPointerException("Entity wasn't added");
+        }
+        T entityAdded = entities.get(0);                               // suppose there are no the same items
+        logger.debug("Inserted entity: " + entityAdded);
+        return entityAdded;
     }
 }
 
