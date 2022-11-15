@@ -11,11 +11,14 @@ public class Main {
     public static void main(String[] args) throws ClassNotFoundException {
         System.out.println("Hello abadayy!");
 
+//        try {
+
+
         System.out.println("------------------- create table -----------------------------");
         Repository<Animal> animalRepository = new Repository<>(Animal.class);
         Repository<User> userRepository = new Repository<>(User.class);
-        userRepository.createTable();
-       animalRepository.createTable();
+//        userRepository.createTable();
+//        animalRepository.createTable();
 
         System.out.println("\n------------------- insert one -----------------------------");
         userRepository.insertOne(new User(1, 1.9999, false, "ana"));
@@ -64,5 +67,9 @@ public class Main {
         System.out.println("\n------------------- delete table -----------------------------");
 //        userRepository.deleteTable();
 //        animalRepository.deleteTable();
+
+//        } catch(Exception ex) {
+//            System.out.println("client get ex: " +  ex);
+//        }
     }
 }

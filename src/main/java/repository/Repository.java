@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
@@ -39,7 +40,7 @@ public class Repository<T> {
     public List<T> getAll() {
         String query = new SQLQuery.SQLQueryBuilder().select().from(clz).build().toString();
         logger.debug("query: " + query);
-        return select(query);
+        return executeSelectQuery(query);
     }
 
     public T getById(int id) {
@@ -53,14 +54,14 @@ public class Repository<T> {
         String query = new SQLQuery.SQLQueryBuilder().select().from(clz).where(conditions).build().toString();
         logger.debug("query: " + query);
 
-        return select(query);
+        return executeSelectQuery(query);
     }
 
     public void insertOne(T object) {
-        logger.info("insertOne");
-        String query = new SQLQuery.SQLQueryBuilder().insertOne(object).build().toString();
-        logger.debug("query: " + query);
-        update(query);
+            logger.info("insertOne");
+            String query = new SQLQuery.SQLQueryBuilder().insertOne(object).build().toString();
+            logger.debug("query: " + query);
+            executeUpdateQuery(query);
     }
 
     public void insertMany(List<T> objects) {
@@ -68,7 +69,7 @@ public class Repository<T> {
         logger.info("insertMany");
         String query = new SQLQuery.SQLQueryBuilder().insertMany(objects).build().toString();
         logger.debug("query: " + query);
-        update(query);
+        executeUpdateQuery(query);
     }
 
 
@@ -78,7 +79,7 @@ public class Repository<T> {
 
         String query = new SQLQuery.SQLQueryBuilder().delete().from(clz).where(conditions).build().toString();
         logger.debug("query: " + query);
-        update(query);
+        executeUpdateQuery(query);
     }
 
     public void updateByProperty(String propertyNameToUpdate, Object valueToUpdate, String propertyNameCondition, Object valueCondition) {
@@ -90,18 +91,18 @@ public class Repository<T> {
 
         String query = new SQLQuery.SQLQueryBuilder().update(clz).set(updates).where(conditions).build().toString();
         logger.debug("query: " + query);
-        update(query);
+        executeUpdateQuery(query);
     }
 
     public void deleteTable() {
         String query = new SQLQuery.SQLQueryBuilder().dropTable(clz).build().toString();
         logger.debug("query: " + query);
-        update(query);
+        executeUpdateQuery(query);
     }
 
 
     // --------------------------- help methods ---------------------------------
-    public List<T> select(String query) {
+    public List<T> executeSelectQuery(String query) {
         List<T> results = null;
 
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
@@ -109,20 +110,28 @@ public class Repository<T> {
             ResultSet resultSet = statement.executeQuery(query);
             results = (List<T>) extractResults(resultSet);
             System.out.printf("%d rows in set%n", results.size());
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            logger.error("Illegal SQL operation: " + ex.getMessage());
+            throw new IllegalArgumentException("You are trying to execute an illegal SQL operation: " + ex.getMessage());
+        } catch (Exception ex) {
+            logger.error("Something went wrong: " + ex.getMessage());
+            throw new RuntimeException("Something went wrong: " + ex.getMessage());
         }
 
         return results;
     }
 
-    public void update(String query) {
+    public void executeUpdateQuery(String query) {
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
-            Statement statement = connection.getConnection().createStatement()) {
+             Statement statement = connection.getConnection().createStatement()) {
             int countEffectedRows = statement.executeUpdate(query);
-            System.out.printf("Query OK, %d row affected%n", countEffectedRows);
-        } catch (Exception e) {
-            e.printStackTrace();
+            logger.info("Query OK, %d row affected%n" + countEffectedRows);
+        } catch (SQLException ex) {
+            logger.error("Illegal SQL operation: " + ex.getMessage());
+            throw new IllegalArgumentException("You are trying to execute an illegal SQL operation: " + ex.getMessage());
+        } catch (Exception ex) {
+            logger.error("Something went wrong: " + ex.getMessage());
+            throw new RuntimeException("Something went wrong: " + ex.getMessage());
         }
     }
 
