@@ -30,7 +30,6 @@ public class SQLQuery {
 
     public static class SQLQueryBuilder {
         private String query;
-
         private static Logger logger = LogManager.getLogger(SQLQueryBuilder.class.getName());
 
 
@@ -56,6 +55,11 @@ public class SQLQuery {
 
         public <T> SQLQueryBuilder dropTable(Class<T> clz) {
             query = "DROP TABLE " + parseTableName(clz);
+            return this;
+        }
+
+        public <T> SQLQueryBuilder truncateTable(Class<T> clz) {
+            query = "TRUNCATE TABLE " + parseTableName(clz);
             return this;
         }
 
@@ -93,10 +97,6 @@ public class SQLQuery {
             return this;
         }
 
-
-
-
-
         public SQLQuery build() {
             return new SQLQuery(this);
         }
@@ -109,10 +109,9 @@ public class SQLQuery {
                 List<Field> classFields = ReflectionUtils.getClassFields(clz);
 
                 for (Field field : classFields) {
-                    query += String.format("%s %s %s,", field.getName(), getFieldSQLType(field), getAnnotationsFromField(field));
-
+                    query += String.format("%s %s %s,", field.getName(),
+                            getFieldSQLType(field), getAnnotationsFromField(field));
                 }
-
                 query = query.substring(0, query.length() - 1) + ")";
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -120,7 +119,6 @@ public class SQLQuery {
 
             return this;
         }
-
 
         public <T> SQLQueryBuilder insertOne(T object) {
             logger.info("insertOne");
@@ -151,8 +149,6 @@ public class SQLQuery {
             return this;
         }
 
-
-        // --------------------------- help methods ---------------------------------
         private static <T> String parseTableName(Class<T> clz) {
             return clz.getSimpleName().toLowerCase();
         }
@@ -165,7 +161,6 @@ public class SQLQuery {
 
             return result;
         }
-
 
         private String getAnnotationsFromField(Field field) {
 
