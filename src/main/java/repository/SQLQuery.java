@@ -36,8 +36,6 @@ public class SQLQuery {
                 for (Field field : classFields) {
                     query += String.format("%s %s %s,", field.getName(), getFieldSQLType(field), getAnnotationsFromField(field));
                 }
-                System.out.println(query);
-                System.out.println(query.substring(0, query.length() - 1));
                 query = query.substring(0, query.length() - 1) + ")";
             } catch (Exception e) {
                 System.out.println(e.getMessage());

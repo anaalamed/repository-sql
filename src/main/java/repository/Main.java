@@ -44,7 +44,6 @@ public class Main {
         userRepository.deleteByProperty("id", 1);
 
 //         ------------------- delete table -----------------------------
-        userRepository.deleteTable();
-        animalRepository.deleteTable();
+
     }
 }
