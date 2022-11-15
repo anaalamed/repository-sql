@@ -44,7 +44,8 @@ public class Repository<T> {
         logger.info("in getById()");
 
         List<T> results = getByProperty("id", id);
-        return results.get(0);
+        T result = results.size() == 0 ? null : results.get(0);
+        return result;
     }
 
     public List<T> getByProperty(String propertyName, Object value) {
@@ -114,7 +115,7 @@ public class Repository<T> {
         executeUpdateQuery(query);
     }
 
-    public List<T> executeSelectQuery(String query) {
+    private List<T> executeSelectQuery(String query) {
         List<T> results = null;
 
         try (SQLConnection connection = SQLConnection.createSQLConnection(this.CONFIGURATION_FILENAME);
@@ -133,7 +134,7 @@ public class Repository<T> {
         return results;
     }
 
-    public void executeUpdateQuery(String query) {
+    private void executeUpdateQuery(String query) {
         try (SQLConnection connection = SQLConnection.createSQLConnection(this.CONFIGURATION_FILENAME);
              Statement statement = connection.getConnection().createStatement()) {
             int countEffectedRows = statement.executeUpdate(query);

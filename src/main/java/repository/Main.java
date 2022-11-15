@@ -28,7 +28,7 @@ public class Main {
         animalsForUser.add(new Animal(1, "a", "a"));
         animalsForUser.add(new Animal(2, "b", "b"));
         userRepository.insertOne(new User(5, 2.3, true, "ana", new Animal(1, "a", "a")));
-//        userRepository.insertOne(new User(5, 2.3, true, "ana", animalsForUser));
+        userRepository.insertOne(new User(6, 2.3, true, "ana", animalsForUser));
 
         System.out.println("\n------------------- insert many -----------------------------");
         ArrayList<Animal> animals = new ArrayList<>();
