@@ -14,7 +14,7 @@ public class RepositoryTests {
     @BeforeAll
     static void beforeAll() {
         userRepository = new Repository<>(User.class);
-        userRepository.createTable();
+        userRepository.createTableIfNotExists();
     }
 
     @Test
@@ -76,7 +76,7 @@ public class RepositoryTests {
     @Test
     @DisplayName("createTable Should throw IllegalArgumentException if table already exists")
     void createTable_TableExists_ThrowsIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> {userRepository.createTable();});
+        assertThrows(IllegalArgumentException.class, () -> {userRepository.createTableIfNotExists();});
     }
 
     @AfterAll

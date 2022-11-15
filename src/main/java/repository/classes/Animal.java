@@ -9,7 +9,12 @@ public class Animal {
     private String type;
 
     public Animal(int id, String name, String type) {
+        this(name, type);
         this.id = id;
+
+    }
+
+    public Animal(String name, String type) {
         this.name = name;
         this.type = type;
     }

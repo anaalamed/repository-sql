@@ -8,12 +8,16 @@ import repository.annotations.Constraints;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import java.util.*;
+
 
 import static repository.FieldType.isBoxedPrimitive;
 
@@ -50,23 +54,34 @@ public class ReflectionUtils {
         return result;
     }
 
-    public static <T> String[] getKeysValuesOfObject(T object) {
+
+    public static <T> Map<String, String> getMapKeysValuesOfObject(T object) {
         List<Field> fields = ReflectionUtils.getClassFields(object.getClass());
-        ArrayList<String> values = new ArrayList<>();
-        ArrayList<String> keys = new ArrayList<>();
+        HashMap<String, String> map = new HashMap<>();
 
         for (Field field : fields) {
-            keys.add(field.getName());
-            values.add(extractFieldValue(object, field));
+            map.put(field.getName(), extractFieldValue(object, field));
         }
 
-        String keysStr = String.join(", ", keys);
-        String valuesStr = String.join(", ", values);
-        return new String[]{keysStr, valuesStr};
+        return map;
+    }
+
+    public static <T> String createKeysStringForQuery(T object) {
+        Map<String, String> mapKeysValues = ReflectionUtils.getMapKeysValuesOfObject(object);
+
+        String keysStr = String.join(", ", mapKeysValues.keySet());
+        return " (" + keysStr + ") ";
+    }
+
+    public static <T> String createValuesStringForQuery(T object) {
+        Map<String, String> mapKeysValues = ReflectionUtils.getMapKeysValuesOfObject(object);
+
+        String valuesStr = String.join(", ", mapKeysValues.values());
+        return " (" + valuesStr + ") ";
     }
 
 
-    public static String getAnnotationsFromField(Field field, Map<Constraints, Integer> annotationsCountByType) {
+    public static String getAnnotationsFromField(Field field) {
 
         StringBuilder constraints = new StringBuilder();
         try {
@@ -77,16 +92,7 @@ public class ReflectionUtils {
                 Method[] methods = type.getDeclaredMethods();
                 for (Method method : methods) {
                     Object value = method.invoke(annotation, (Object[]) null);
-
-                    if (value != null) {
-                        Constraints val = ((Constraints) value);
-                        if (!annotationsCountByType.containsKey(val)) {
-                            annotationsCountByType.put(val, 1);
-                        } else {
-                            annotationsCountByType.put(val, annotationsCountByType.get(val) + 1);
-                        }
-                        constraints.append(value).append(" ");
-                    }
+                    constraints.append(value).append(" ");
                 }
             }
         } catch (InvocationTargetException | IllegalAccessException e) {

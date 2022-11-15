@@ -16,28 +16,21 @@ public class User {
     private List<Animal> animals;
     private Animal favouriteAnimal;
 
-    public User(int id, double weight, boolean isDeveloper, String name) {
+    public User(int id, double weight, boolean isDeveloper, String name,Animal animal, List<Animal> animals) {
+        this(weight,isDeveloper,name,animal,animals);
         this.id = id;
-        this.weight = weight;
-        this.isDeveloper = isDeveloper;
-        this.name = name;
+
     }
 
-    public User(int id, double weight, boolean isDeveloper, String name, List<Animal> animals) {
-        this.id = id;
+
+    public User(double weight, boolean isDeveloper, String name,Animal animal, List<Animal> animals){
         this.weight = weight;
         this.isDeveloper = isDeveloper;
         this.name = name;
-        this.animals = animals;
+        this.animals=animals;
+        this.favouriteAnimal=animal;
     }
 
-    public User(int id, double weight, boolean isDeveloper, String name, Animal animal) {
-        this.id = id;
-        this.weight = weight;
-        this.isDeveloper = isDeveloper;
-        this.name = name;
-        this.favouriteAnimal = animal;
-    }
 
     public User() {
     }

@@ -83,7 +83,7 @@ public class SQLQuery {
                 setQuery.append(updates.get(i));
 
                 if (i < updates.size() - 1) {
-                    setQuery.append(" AND ");
+                    setQuery.append(" , ");
                 }
             }
             query += setQuery.toString();
@@ -110,10 +110,9 @@ public class SQLQuery {
         }
 
 
-
         // -------------- building dynamic query inside the methods -----------------
         public <T> SQLQueryBuilder createTableIfNotExists(Class<T> clz) {
-            Map<Constraints, Integer> annotationsCountByType = new HashMap<>();
+
             StringBuilder createTableQuery = new StringBuilder(String.format("CREATE TABLE IF NOT EXISTS  %s (", ReflectionUtils.parseTableName(clz)));
 
 
@@ -121,9 +120,8 @@ public class SQLQuery {
                 List<Field> classFields = ReflectionUtils.getClassFields(clz);
 
                 for (Field field : classFields) {
-                    createTableQuery.append(String.format("%s %s %s,", field.getName(), ReflectionUtils.getFieldSQLType(field), ReflectionUtils.getAnnotationsFromField(field, annotationsCountByType)));
+                    createTableQuery.append(String.format("%s %s %s,", field.getName(), ReflectionUtils.getFieldSQLType(field), ReflectionUtils.getAnnotationsFromField(field)));
                 }
-                System.out.println(annotationsCountByType);
                 query = createTableQuery.toString();
                 query = query.substring(0, query.length() - 1) + ")";
 
@@ -136,48 +134,36 @@ public class SQLQuery {
 
         public <T> SQLQueryBuilder insertOne(T object) {
 
-            logger.info("insertOne");
-            String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
-            logger.debug("values: " + keysValuesArr[1]);
-            query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") " + "VALUES (" + keysValuesArr[1] + ")";
-            query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") " + "VALUES (" + keysValuesArr[1] + ")";
-
             logger.info("in SQLQueryBuilder.insertOne()");
 
-            List<T> wrappingList = new ArrayList<>();
-            wrappingList.add(object);
+            query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + ReflectionUtils.createKeysStringForQuery(object)
+                    + "VALUES " + ReflectionUtils.createValuesStringForQuery(object);
+            return this;
 
-
-            return insertMany(wrappingList);
         }
 
         public <T> SQLQueryBuilder insertMany(List<T> objects) {
             logger.info("in SQLQueryBuilder.insertMany()");
 
-            String keys = "";
             ArrayList<String> values = new ArrayList<>();
-
-            for (T object : objects) {
-                String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
-                keys = ("(" + keysValuesArr[0] + ")");
-                values.add("(" + keysValuesArr[1] + ")");
+            for (T object: objects) {
+                values.add( ReflectionUtils.createValuesStringForQuery(object) );
             }
 
             String valuesStr = String.join(", ", values);
 
-            query = "INSERT INTO " + ReflectionUtils.parseTableName(objects.get(0).getClass()) + keys + "VALUES" + valuesStr;
+            query = "INSERT INTO " + ReflectionUtils.parseTableName(objects.get(0).getClass()) + ReflectionUtils.createKeysStringForQuery(objects.get(0))
+                    + "VALUES" + valuesStr;
 
             return this;
         }
 
+        public String build () {
+                return new SQLQuery(this).query;
+            }
 
-        public String build() {
-            return new SQLQuery(this).query;
         }
-
-
     }
-}
 
 
 

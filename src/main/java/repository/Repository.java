@@ -3,6 +3,8 @@ package repository;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import repository.annotations.Constraints;
+import repository.utils.ReflectionUtils;
 import repository.utils.SQLConnection;
 
 import java.lang.reflect.Constructor;
@@ -12,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
+import static repository.utils.ReflectionUtils.getAnnotationsFromField;
 import static repository.utils.ReflectionUtils.isComplexObject;
 
 public class Repository<T> {
@@ -21,6 +24,7 @@ public class Repository<T> {
 
     public Repository(Class<T> clz) {
         this.clz = clz;
+
     }
 
     public void createTableIfNotExists() {
@@ -67,18 +71,28 @@ public class Repository<T> {
         return executeSelectQuery(query);
     }
 
-    public void insertOne(T object) {
+    public T insertOne(T object) {
         logger.info("in insertOne()");
         String query = new SQLQuery.SQLQueryBuilder().insertOne(object).build();
         logger.debug("Executing query: " + query);
+        System.out.println(query);
         executeUpdateQuery(query);
+        return getAddedEntity(object);
     }
 
-    public void insertMany(List<T> objects) {
+    public List<T> insertMany(List<T> objects) {
         logger.info("in insertMany()");
         String query = new SQLQuery.SQLQueryBuilder().insertMany(objects).build();
         logger.debug("Executing query: " + query);
+        System.out.println(query);
         executeUpdateQuery(query);
+
+        List<T> insertedEntities = new ArrayList<>();
+        for (T object: objects) {
+            insertedEntities.add(getAddedEntity(object));
+        }
+        logger.debug("Inserted entities: " + insertedEntities);
+        return insertedEntities;
     }
 
     public void deleteByProperty(String propertyName, Object value) {
@@ -96,14 +110,26 @@ public class Repository<T> {
                                  String conditionProperty, Object conditionValue) {
         logger.info("in updateByProperty()");
 
-        List<String> conditions = new ArrayList<>();
-        conditions.add(conditionProperty + " = \"" + conditionValue + "\"");
+        List<String> condition = new ArrayList<>(List.of(conditionProperty + " = \"" + conditionValue + "\""));
+        List<String> update = new ArrayList<>(List.of(propertyToUpdate + " = \"" + valueToUpdate + "\""));
 
+        String query = new SQLQuery.SQLQueryBuilder().update(clz).set(update).where(condition).build();
+        logger.debug("Executing query: " + query);
+        executeUpdateQuery(query);
+    }
+
+    public void updateEntireEntity(String conditionProperty, Object conditionValue, T object) {
+        logger.info("in updateEntireProperty()");
+
+        List<String> condition = new ArrayList<>(List.of(conditionProperty + " = \"" + conditionValue + "\""));
+
+        Map<String,String> mapKeysValues = ReflectionUtils.getMapKeysValuesOfObject(object);
         List<String> updates = new ArrayList<>();
-        updates.add(propertyToUpdate + " = \"" + valueToUpdate + "\"");
+        for (String key: mapKeysValues.keySet() ) {
+            updates.add(key + " = " + mapKeysValues.get(key) );
+        }
 
-        String query = new SQLQuery.SQLQueryBuilder().update(clz).set(updates).where(conditions).build();
-
+        String query = new SQLQuery.SQLQueryBuilder().update(clz).set(updates).where(condition).build();
         logger.debug("Executing query: " + query);
         executeUpdateQuery(query);
     }
@@ -123,11 +149,11 @@ public class Repository<T> {
         executeUpdateQuery(query);
     }
 
+
+
+    // -------------------- help methods ------------------------------
     private List<T> executeSelectQuery(String query) {
         List<T> results = null;
-
-
-
 
         try (SQLConnection connection = SQLConnection.createSQLConnection(this.CONFIGURATION_FILENAME);
             Statement statement = connection.getConnection().createStatement()) {
@@ -185,6 +211,36 @@ public class Repository<T> {
         }
 
         return results;
+    }
+
+    private T getAddedEntity(T object) {
+        logger.info("in getAddedEntity()");
+        Map<String,String> mapKeysValues = ReflectionUtils.getMapKeysValuesOfObject(object);
+        List<String> conditions = new ArrayList<>();
+        for (String key: mapKeysValues.keySet() ) {
+            Field field= null;
+            try {
+                field =object.getClass().getDeclaredField(key);
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+            String annotationString = ReflectionUtils.getAnnotationsFromField(field);
+            if(!annotationString.contains(Constraints.PRIMARY_KEY.toString())){
+               conditions.add(key + " = " + mapKeysValues.get(key) );
+            }
+        }
+
+        String getQuery = new SQLQuery.SQLQueryBuilder().select().from(object.getClass()).where(conditions).build();
+        logger.debug(getQuery);
+        System.out.println(getQuery);
+        List<T> entities = executeSelectQuery(getQuery);
+        if ( entities == null || entities.size() == 0) {
+            logger.error("Entity wasn't added");
+            throw new NullPointerException("Entity wasn't added");
+        }
+        T entityAdded = entities.get(0);                               // suppose there are no the same items
+        logger.debug("Inserted entity: " + entityAdded);
+        return entityAdded;
     }
 }
 
