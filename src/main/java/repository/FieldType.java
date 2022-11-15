@@ -8,7 +8,7 @@ public enum FieldType {
     INT("INT", 16, 0),
     INTEGER("INT", 16, 0),
     FLOAT("FLOAT", 16, 2),
-    DOUBLE("DOUBLE", 16, 2),
+    DOUBLE("DOUBLE", 16, 9),
     BOOLEAN("BOOLEAN", 0, 0),
     STRING("VARCHAR", 50, 0),
     LIST("VARCHAR", 1000, 0),

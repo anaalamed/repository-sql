@@ -2,14 +2,14 @@ package repository;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import repository.annotations.Constraints;
 import repository.utils.ReflectionUtils;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class SQLQuery {
@@ -58,9 +58,9 @@ public class SQLQuery {
         }
 
         public <T> SQLQueryBuilder dropTable(Class<T> clz) {
+            query = "DROP TABLE IF EXISTS " + ReflectionUtils.parseTableName(clz);
             logger.info("in SQLQueryBuilder.dropTable()");
 
-            query = "DROP TABLE " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
@@ -77,15 +77,16 @@ public class SQLQuery {
             if (updates.size() == 0) {
                 return this;
             }
+            StringBuilder setQuery = new StringBuilder(" SET ");
 
-            query += " SET ";
             for (int i = 0; i < updates.size(); i++) {
-                query += updates.get(i);
+                setQuery.append(updates.get(i));
 
                 if (i < updates.size() - 1) {
-                    query += " , ";
+                    setQuery.append(" , ");
                 }
             }
+            query += setQuery.toString();
             return this;
         }
 
@@ -95,47 +96,50 @@ public class SQLQuery {
             if (conditions.size() == 0) {
                 return this;
             }
+            StringBuilder WhereQuery = new StringBuilder(" WHERE ");
 
-            query += " WHERE ";
             for (int i = 0; i < conditions.size(); i++) {
-                query += conditions.get(i);
+                WhereQuery.append(conditions.get(i));
 
                 if (i < conditions.size() - 1) {
-                    query += " AND ";
+                    WhereQuery.append(" AND ");
                 }
             }
-
+            query += WhereQuery.toString();
             return this;
         }
 
-        // -------------- building dynamic query inside the methods -----------------
-        public <T> SQLQueryBuilder createTable(Class<T> clz) {
-            logger.info("in SQLQueryBuilder.createTable()");
 
-            this.query = String.format("CREATE TABLE %s (", ReflectionUtils.parseTableName(clz));
+        // -------------- building dynamic query inside the methods -----------------
+        public <T> SQLQueryBuilder createTableIfNotExists(Class<T> clz) {
+
+            StringBuilder createTableQuery = new StringBuilder(String.format("CREATE TABLE IF NOT EXISTS  %s (", ReflectionUtils.parseTableName(clz)));
+
 
             try {
                 List<Field> classFields = ReflectionUtils.getClassFields(clz);
 
                 for (Field field : classFields) {
-                    query += String.format("%s %s %s,", field.getName(),
-                            ReflectionUtils.getFieldSQLType(field), getAnnotationsFromField(field));
+                    createTableQuery.append(String.format("%s %s %s,", field.getName(), ReflectionUtils.getFieldSQLType(field), ReflectionUtils.getAnnotationsFromField(field)));
                 }
+                query = createTableQuery.toString();
                 query = query.substring(0, query.length() - 1) + ")";
+
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-
             return this;
         }
 
+
         public <T> SQLQueryBuilder insertOne(T object) {
+
             logger.info("in SQLQueryBuilder.insertOne()");
 
             query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + ReflectionUtils.createKeysStringForQuery(object)
                     + "VALUES " + ReflectionUtils.createValuesStringForQuery(object);
-
             return this;
+
         }
 
         public <T> SQLQueryBuilder insertMany(List<T> objects) {
@@ -154,29 +158,12 @@ public class SQLQuery {
             return this;
         }
 
-        public String build() {
-            return new SQLQuery(this).query;
-        }
-
-        private String getAnnotationsFromField(Field field) {
-
-            StringBuilder constraints = new StringBuilder();
-            try {
-                Annotation[] annotations = field.getAnnotations();
-
-                for (Annotation annotation : annotations) {
-                    Class<? extends Annotation> type = annotation.annotationType();
-                    Method[] methods = type.getDeclaredMethods();
-                    for (Method method : methods) {
-                        Object value = method.invoke(annotation, (Object[]) null);
-                        constraints.append(value).append(" ");
-                    }
-                }
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                e.printStackTrace();
+        public String build () {
+                return new SQLQuery(this).query;
             }
 
-            return constraints.toString();
         }
     }
-}
+
+
+

@@ -3,6 +3,7 @@ package repository;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import repository.annotations.Constraints;
 import repository.utils.ReflectionUtils;
 import repository.utils.SQLConnection;
 
@@ -13,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
+import static repository.utils.ReflectionUtils.getAnnotationsFromField;
 import static repository.utils.ReflectionUtils.isComplexObject;
 
 public class Repository<T> {
@@ -22,15 +24,24 @@ public class Repository<T> {
 
     public Repository(Class<T> clz) {
         this.clz = clz;
+
     }
 
-    public void createTable() {
+    public void createTableIfNotExists() {
         logger.info("in createTable()");
-
-        String query = new SQLQuery.SQLQueryBuilder().createTable(clz).build();
+        String query = new SQLQuery.SQLQueryBuilder().createTableIfNotExists(clz).build();
         logger.debug("Executing query: " + query);
 
+        try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
+             Statement statement = connection.getConnection().createStatement()) {
+            statement.executeUpdate(query);
+            System.out.println("Table Created");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         executeUpdateQuery(query);
+
     }
 
     public List<T> getAll() {
@@ -64,8 +75,8 @@ public class Repository<T> {
         logger.info("in insertOne()");
         String query = new SQLQuery.SQLQueryBuilder().insertOne(object).build();
         logger.debug("Executing query: " + query);
+        System.out.println(query);
         executeUpdateQuery(query);
-
         return getAddedEntity(object);
     }
 
@@ -73,6 +84,7 @@ public class Repository<T> {
         logger.info("in insertMany()");
         String query = new SQLQuery.SQLQueryBuilder().insertMany(objects).build();
         logger.debug("Executing query: " + query);
+        System.out.println(query);
         executeUpdateQuery(query);
 
         List<T> insertedEntities = new ArrayList<>();
@@ -148,6 +160,7 @@ public class Repository<T> {
             ResultSet resultSet = statement.executeQuery(query);
             results = (List<T>) extractResults(resultSet);
             logger.info(String.format("%d rows in set", results.size()));
+
         } catch (SQLException ex) {
             logger.error("Illegal SQL operation: " + ex.getMessage());
             throw new IllegalArgumentException("You are trying to execute an illegal SQL operation: " + ex.getMessage(), ex);
@@ -205,12 +218,21 @@ public class Repository<T> {
         Map<String,String> mapKeysValues = ReflectionUtils.getMapKeysValuesOfObject(object);
         List<String> conditions = new ArrayList<>();
         for (String key: mapKeysValues.keySet() ) {
-            conditions.add(key + " = " + mapKeysValues.get(key) );
+            Field field= null;
+            try {
+                field =object.getClass().getDeclaredField(key);
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+            String annotationString = ReflectionUtils.getAnnotationsFromField(field);
+            if(!annotationString.contains(Constraints.PRIMARY_KEY.toString())){
+               conditions.add(key + " = " + mapKeysValues.get(key) );
+            }
         }
 
         String getQuery = new SQLQuery.SQLQueryBuilder().select().from(object.getClass()).where(conditions).build();
         logger.debug(getQuery);
-
+        System.out.println(getQuery);
         List<T> entities = executeSelectQuery(getQuery);
         if ( entities == null || entities.size() == 0) {
             logger.error("Entity wasn't added");

@@ -3,10 +3,21 @@ package repository.utils;
 import com.google.gson.Gson;
 
 import repository.FieldType;
+import repository.annotations.Constraints;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import java.util.*;
+
 
 import static repository.FieldType.isBoxedPrimitive;
 
@@ -68,6 +79,30 @@ public class ReflectionUtils {
         String valuesStr = String.join(", ", mapKeysValues.values());
         return " (" + valuesStr + ") ";
     }
+
+
+    public static String getAnnotationsFromField(Field field) {
+
+        StringBuilder constraints = new StringBuilder();
+        try {
+            Annotation[] annotations = field.getAnnotations();
+
+            for (Annotation annotation : annotations) {
+                Class<? extends Annotation> type = annotation.annotationType();
+                Method[] methods = type.getDeclaredMethods();
+                for (Method method : methods) {
+                    Object value = method.invoke(annotation, (Object[]) null);
+                    constraints.append(value).append(" ");
+                }
+            }
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        return constraints.toString();
+    }
+
+
 
     private static <T> String extractFieldValue(T object, Field field) {
         String value = null;
