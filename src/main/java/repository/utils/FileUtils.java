@@ -1,12 +1,12 @@
-package repository;
+package repository.utils;
 
 import com.google.gson.Gson;
 
 import java.io.*;
 
-class FileUtils {
+public class FileUtils {
 
-    static <T> T writeObjectToJsonFile(final String filename, T object) {
+    public static <T> T writeObjectToJsonFile(final String filename, T object) {
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename)))) {
             Gson gson = new Gson();
             gson.toJson(object, writer);

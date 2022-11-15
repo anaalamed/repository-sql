@@ -1,5 +1,7 @@
 package repository.classes;
 
+import repository.annotations.Auto_Increment;
+
 public class Animal {
 
     private int id;
