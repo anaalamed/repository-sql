@@ -2,6 +2,7 @@ package repository;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import repository.utils.SQLConnection;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -12,7 +13,7 @@ import java.util.*;
 
 public class Repository<T> {
     private final Class<T> clz;
-    private static Logger logger = LogManager.getLogger(Repository.class.getName());
+    private final static Logger logger = LogManager.getLogger(Repository.class.getName());
 
     public Repository(Class<T> clz) {
         this.clz = clz;

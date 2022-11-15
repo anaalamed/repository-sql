@@ -1,20 +1,15 @@
 package repository;
 
-import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import repository.utils.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static repository.FieldType.isBoxedPrimitive;
 
 public class SQLQuery {
     private final String query;
@@ -30,7 +25,7 @@ public class SQLQuery {
 
     public static class SQLQueryBuilder {
         private String query;
-        private static Logger logger = LogManager.getLogger(SQLQueryBuilder.class.getName());
+        private final static Logger logger = LogManager.getLogger(SQLQueryBuilder.class.getName());
 
 
         public SQLQueryBuilder select() {
@@ -44,22 +39,22 @@ public class SQLQuery {
         }
 
         public <T> SQLQueryBuilder from(Class<T> clz) {
-            query += " FROM " + parseTableName(clz);
+            query += " FROM " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
         public <T> SQLQueryBuilder update(Class<T> clz) {
-            query = " UPDATE " + parseTableName(clz);
+            query = " UPDATE " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
         public <T> SQLQueryBuilder dropTable(Class<T> clz) {
-            query = "DROP TABLE " + parseTableName(clz);
+            query = "DROP TABLE " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
         public <T> SQLQueryBuilder truncateTable(Class<T> clz) {
-            query = "TRUNCATE TABLE " + parseTableName(clz);
+            query = "TRUNCATE TABLE " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
@@ -103,14 +98,14 @@ public class SQLQuery {
 
         // -------------- building dynamic query inside the methods -----------------
         public <T> SQLQueryBuilder createTable(Class<T> clz) {
-            this.query = String.format("CREATE TABLE %s (", parseTableName(clz));
+            this.query = String.format("CREATE TABLE %s (", ReflectionUtils.parseTableName(clz));
 
             try {
                 List<Field> classFields = ReflectionUtils.getClassFields(clz);
 
                 for (Field field : classFields) {
                     query += String.format("%s %s %s,", field.getName(),
-                            getFieldSQLType(field), getAnnotationsFromField(field));
+                            ReflectionUtils.getFieldSQLType(field), getAnnotationsFromField(field));
                 }
                 query = query.substring(0, query.length() - 1) + ")";
             } catch (Exception e) {
@@ -122,10 +117,10 @@ public class SQLQuery {
 
         public <T> SQLQueryBuilder insertOne(T object) {
             logger.info("insertOne");
-            String[] keysValuesArr = getKeysValuesOfObject(object);
+            String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
             logger.debug("values: " + keysValuesArr[1]);
 
-            query = "INSERT INTO " + parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") "
+            query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") "
                     + "VALUES (" + keysValuesArr[1] + ")";
 
             return this;
@@ -136,31 +131,20 @@ public class SQLQuery {
             ArrayList<String> values = new ArrayList<>();
 
             for (T object: objects) {
-                String[] keysValuesArr = getKeysValuesOfObject(object);
+                String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
                 keys =  ("(" + keysValuesArr[0] + ")");
                 values.add("(" + keysValuesArr[1] + ")");
             }
 
             String valuesStr = String.join(", ", values);
 
-            query = "INSERT INTO " + parseTableName(objects.get(0).getClass()) + keys
+            query = "INSERT INTO " + ReflectionUtils.parseTableName(objects.get(0).getClass()) + keys
                     + "VALUES" + valuesStr;
 
             return this;
         }
 
-        private static <T> String parseTableName(Class<T> clz) {
-            return clz.getSimpleName().toLowerCase();
-        }
 
-        private String getFieldSQLType(Field field) {
-            String fieldTypeValue = field.getType().toString().substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
-
-            boolean isSQLField = Arrays.stream(FieldType.values()).anyMatch((t) -> t.name().equals(fieldTypeValue));
-            String result = isSQLField ? FieldType.valueOf(fieldTypeValue).toString() : FieldType.OBJECT.toString();
-
-            return result;
-        }
 
         private String getAnnotationsFromField(Field field) {
 
@@ -182,30 +166,6 @@ public class SQLQuery {
 
             return constraints.toString();
         }
-        private static <T> String[] getKeysValuesOfObject(T object) {
-            List<Field> fields = ReflectionUtils.getClassFields(object.getClass());
-            ArrayList<String> values = new ArrayList<>();
-            ArrayList<String> keys = new ArrayList<>();
 
-            for (Field field : fields) {
-                keys.add(field.getName());
-
-                try {
-                    if (field.getType().isPrimitive() || isBoxedPrimitive(field.getType())) {
-                        values.add(field.get(object).toString());
-                    } else {
-                        Gson gson = new Gson();
-                        values.add(gson.toJson(field.get(object)));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            String keysStr = String.join(", ", keys);
-            String valuesStr = String.join(", ", values);
-            return new String[]{keysStr, valuesStr};
-
-        }
     }
 }
