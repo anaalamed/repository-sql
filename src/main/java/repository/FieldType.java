@@ -11,9 +11,9 @@ public enum FieldType {
     DOUBLE("DOUBLE", 16, 2),
     BOOLEAN("BOOLEAN", 0, 0),
     STRING("VARCHAR", 50, 0),
-    LIST("TEXT", 1000, 0),
-    MAP("TEXT", 1000, 0),
-    OBJECT("TEXT", 1000, 0);
+    LIST("VARCHAR", 1000, 0),
+    MAP("VARCHAR", 1000, 0),
+    OBJECT("VARCHAR", 1000, 0);
 
     private final String text;
     private final int size;
