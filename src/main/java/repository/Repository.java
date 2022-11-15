@@ -1,6 +1,5 @@
 package repository;
 
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,17 +11,17 @@ import java.util.*;
 
 public class Repository<T> {
     private final Class<T> clz;
-
-
     private static Logger logger = LogManager.getLogger(Repository.class.getName());
-
 
     public Repository(Class<T> clz) {
         this.clz = clz;
     }
 
     public void createTable() {
+        logger.info("in createTable()");
+
         String query = new SQLQuery.SQLQueryBuilder().createTable(clz).build().toString();
+        logger.debug("Executing query: " + query);
 
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
              Statement statement = connection.getConnection().createStatement()) {
@@ -34,70 +33,90 @@ public class Repository<T> {
     }
 
     public List<T> getAll() {
+        logger.info("in getAll()");
+
         String query = new SQLQuery.SQLQueryBuilder().select().from(clz).build().toString();
-        logger.debug("query: " + query);
+        logger.debug("Executing query: " + query);
         return select(query);
     }
 
     public T getById(int id) {
+        logger.info("in getById()");
+
         List<T> results = getByProperty("id", id);
         return results.get(0);
     }
 
     public List<T> getByProperty(String propertyName, Object value) {
+        logger.info("in getByProperty()");
+
         List<String> conditions = new ArrayList<>();
         conditions.add(propertyName + " = \"" + value + "\"");
         String query = new SQLQuery.SQLQueryBuilder().select().from(clz).where(conditions).build().toString();
-        logger.debug("query: " + query);
+        logger.debug("Executing query: " + query);
 
         return select(query);
     }
 
     public void insertOne(T object) {
-        logger.info("insertOne");
+        logger.info("in insertOne()");
+
         String query = new SQLQuery.SQLQueryBuilder().insertOne(object).build().toString();
-        logger.debug("query: " + query);
+        logger.debug("Executing query: " + query);
         update(query);
     }
 
     public void insertMany(List<T> objects) {
-        // new query for training
-        logger.info("insertMany");
+        logger.info("in insertMany()");
+
         String query = new SQLQuery.SQLQueryBuilder().insertMany(objects).build().toString();
-        logger.debug("query: " + query);
+        logger.debug("Executing query: " + query);
         update(query);
     }
 
 
     public void deleteByProperty(String propertyName, Object value) {
+        logger.info("in deleteByProperty()");
+
         List<String> conditions = new ArrayList<>();
         conditions.add(propertyName + " = \"" + value + "\"");
 
         String query = new SQLQuery.SQLQueryBuilder().delete().from(clz).where(conditions).build().toString();
-        logger.debug("query: " + query);
+        logger.debug("Executing query: " + query);
         update(query);
     }
 
-    public void updateByProperty(String propertyNameToUpdate, Object valueToUpdate, String propertyNameCondition, Object valueCondition) {
+    public void updateByProperty(String propertyToUpdate, Object valueToUpdate,
+                                 String conditionProperty, Object conditionValue) {
+        logger.info("in updateByProperty()");
+
         List<String> conditions = new ArrayList<>();
-        conditions.add(propertyNameCondition + " = \"" + valueCondition + "\"");
+        conditions.add(conditionProperty + " = \"" + conditionValue + "\"");
 
         List<String> updates = new ArrayList<>();
-        updates.add(propertyNameToUpdate + " = \"" + valueToUpdate + "\"");
+        updates.add(propertyToUpdate + " = \"" + valueToUpdate + "\"");
 
         String query = new SQLQuery.SQLQueryBuilder().update(clz).set(updates).where(conditions).build().toString();
-        logger.debug("query: " + query);
+        logger.debug("Executing query: " + query);
         update(query);
     }
 
-    public void deleteTable() {
+    public void dropTable() {
+        logger.info("in dropTable()");
+
         String query = new SQLQuery.SQLQueryBuilder().dropTable(clz).build().toString();
-        logger.debug("query: " + query);
+        logger.debug("Executing query: " + query);
         update(query);
     }
 
+    public void truncateTable() {
+        logger.info("in truncateTable()");
 
-    // --------------------------- help methods ---------------------------------
+        String query = new SQLQuery.SQLQueryBuilder().truncateTable(clz).build().toString();
+        logger.debug("Executing query: " + query);
+        update(query);
+    }
+
     public List<T> select(String query) {
         List<T> results = null;
 
