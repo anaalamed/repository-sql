@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-
 public class SQLConnection implements AutoCloseable {
     Connection connection;
 
@@ -31,8 +30,6 @@ public class SQLConnection implements AutoCloseable {
     }
 
     public static ConnectionData parseConfigFile(String filename) {
-        final File folder = new File(filename);
-
         try (FileInputStream fileInputStream = new FileInputStream(filename)) {
             Gson gson = new Gson();
             JsonReader jsonReader = new JsonReader(new InputStreamReader(fileInputStream));
