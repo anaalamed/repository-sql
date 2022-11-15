@@ -14,6 +14,7 @@ public class User {
     @NotNull
     private String name;
     private List<Animal> animals;
+    private Animal favouriteAnimal;
 
     public User(int id, double weight, boolean isDeveloper, String name) {
         this.id = id;
@@ -28,6 +29,14 @@ public class User {
         this.isDeveloper = isDeveloper;
         this.name = name;
         this.animals = animals;
+    }
+
+    public User(int id, double weight, boolean isDeveloper, String name, Animal animal) {
+        this.id = id;
+        this.weight = weight;
+        this.isDeveloper = isDeveloper;
+        this.name = name;
+        this.favouriteAnimal = animal;
     }
 
     public User() {
@@ -72,6 +81,14 @@ public class User {
 
     public void setDeveloper(boolean developer) {
         isDeveloper = developer;
+    }
+
+    public Animal getFavouriteAnimal() {
+        return favouriteAnimal;
+    }
+
+    public void setFavouriteAnimal(Animal favouriteAnimal) {
+        this.favouriteAnimal = favouriteAnimal;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package repository;
+package repository.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -23,7 +23,7 @@ public class SQLConnection implements AutoCloseable {
 
     public static SQLConnection createSQLConnection(String filename) throws SQLException, ClassNotFoundException {
         ConnectionData connectionData = parseConfigFile(filename);
-        return new SQLConnection(connectionData.databaseName, connectionData.user, connectionData.password);
+        return new SQLConnection(connectionData.getDatabaseName(), connectionData.getUser(), connectionData.getPassword());
     }
 
     public Connection getConnection() {

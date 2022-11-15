@@ -11,22 +11,25 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("================= HELLO ABADAY! =================");
 
+
         System.out.println("------------------- create table -----------------------------");
         Repository<Animal> animalRepository = new Repository<>(Animal.class);
         Repository<User> userRepository = new Repository<>(User.class);
-        userRepository.createTable();
-        animalRepository.createTable();
+//        userRepository.createTable();
+//        animalRepository.createTable();
 
         System.out.println("\n------------------- insert one -----------------------------");
-        userRepository.insertOne(new User(1, 1.9999, false, "ana"));
-        userRepository.insertOne(new User(2, 3.12, true, "khaled"));
-        userRepository.insertOne(new User(3, 1.9999, true, "lior"));
+//        userRepository.insertOne(new User(1, 1.9999, false, "ana"));
+//        userRepository.insertOne(new User(2, 3.12, true, "khaled"));
+//        userRepository.insertOne(new User(3, 1.9999, true, "lior"));
+//        userRepository.insertOne(new User(4, 1.9999, true, "delete"));
 
-//        // check for List
+//        // check for Object
 //        ArrayList<Animal> animalsForUser = new ArrayList<>();
 //        animalsForUser.add(new Animal(1, "a", "a"));
 //        animalsForUser.add(new Animal(2, "b", "b"));
-//        userRepository.insertOne(new User(5, 2.3, true, "ana", animalsForUser));
+//        userRepository.insertOne(new User(5, 2.3, true, "ana", new Animal(1, "a", "a")));
+////        userRepository.insertOne(new User(5, 2.3, true, "ana", animalsForUser));
 
         System.out.println("\n------------------- insert many -----------------------------");
         ArrayList<Animal> animals = new ArrayList<>();
@@ -53,15 +56,18 @@ public class Main {
 
         System.out.println("\n------------------- update by property -----------------------------");
         userRepository.updateByProperty("weight", 50, "id", 2);
+        userRepository.updateByProperty("isDeveloper", 1, "name", "ana");
 
         System.out.println("\n------------------- delete by property -----------------------------");
-        userRepository.deleteByProperty("id", 1);
+        userRepository.deleteByProperty("id", 4);
 
         System.out.println("\n------------------- truncate table -----------------------------");
-        userRepository.truncateTable();
+//        userRepository.truncateTable();
 
         System.out.println("\n------------------- delete table -----------------------------");
-        userRepository.dropTable();
-        animalRepository.dropTable();
+//        userRepository.dropTable();
+//        animalRepository.dropTable();
+
+
     }
 }
