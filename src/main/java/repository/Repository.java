@@ -1,8 +1,8 @@
 package repository;
 
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import repository.annotations.Constraints;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -13,7 +13,9 @@ import java.util.*;
 public class Repository<T> {
     private final Class<T> clz;
 
+
     private static Logger logger = LogManager.getLogger(Repository.class.getName());
+
 
 
 
@@ -23,10 +25,10 @@ public class Repository<T> {
 
     public void createTable() {
         String query = new SQLQuery.SQLQueryBuilder().createTable(clz).build().toString();
-        logger.debug("query: " + query);
 
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
              Statement statement = connection.getConnection().createStatement()) {
+            System.out.println(query);
             statement.executeUpdate(query);
             System.out.println("Table Created");
         } catch (Exception e) {
@@ -69,6 +71,7 @@ public class Repository<T> {
         update(query);
     }
 
+
     public void deleteByProperty(String propertyName, Object value) {
         List<String> conditions = new ArrayList<>();
         conditions.add(propertyName + " = \"" + value + "\"");
@@ -105,7 +108,7 @@ public class Repository<T> {
             Statement statement = connection.getConnection().createStatement()) {
             ResultSet resultSet = statement.executeQuery(query);
             results = (List<T>) extractResults(resultSet);
-            System.out.println(String.format("%d rows in set", results.size()));
+            System.out.printf("%d rows in set%n", results.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -117,7 +120,7 @@ public class Repository<T> {
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
             Statement statement = connection.getConnection().createStatement()) {
             int countEffectedRows = statement.executeUpdate(query);
-            System.out.println(String.format("Query OK, %d row affected", countEffectedRows));
+            System.out.printf("Query OK, %d row affected%n", countEffectedRows);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -128,7 +131,7 @@ public class Repository<T> {
 
         try {
             while (resultSet.next()) {
-                Constructor<T> constructor = (Constructor<T>) clz.getConstructor();
+                Constructor<T> constructor = clz.getConstructor();
                 T item = constructor.newInstance();
                 Field[] declaredFields = clz.getDeclaredFields();
 
@@ -146,9 +149,9 @@ public class Repository<T> {
         return results;
     }
 
-    private Map<Constraints, String> getAnnotationsFromField(Field field) {
-        Map<Constraints, String> constraints = new HashMap<>();
-        return constraints;
-    }
 }
+
+
+
+
 

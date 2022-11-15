@@ -4,7 +4,10 @@ import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -88,6 +91,10 @@ public class SQLQuery {
             return this;
         }
 
+
+
+
+
         public SQLQuery build() {
             return new SQLQuery(this);
         }
@@ -100,7 +107,8 @@ public class SQLQuery {
                 List<Field> classFields = ReflectionUtils.getClassFields(clz);
 
                 for (Field field : classFields) {
-                    query += String.format("%s %s,", field.getName(), getFieldSQLType(field));
+                    query += String.format("%s %s %s,", field.getName(), getFieldSQLType(field), getAnnotationsFromField(field));
+
                 }
 
                 query = query.substring(0, query.length() - 1) + ")";
@@ -110,6 +118,7 @@ public class SQLQuery {
 
             return this;
         }
+
 
         public <T> SQLQueryBuilder insertOne(T object) {
             logger.info("insertOne");
@@ -147,8 +156,7 @@ public class SQLQuery {
         }
 
         private String getFieldSQLType(Field field) {
-            String fieldTypeValue = field.getType().toString()
-                    .substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
+            String fieldTypeValue = field.getType().toString().substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
 
             boolean isSQLField = Arrays.stream(FieldType.values()).anyMatch((t) -> t.name().equals(fieldTypeValue));
             String result = isSQLField ? FieldType.valueOf(fieldTypeValue).toString() : FieldType.OBJECT.toString();
@@ -156,6 +164,27 @@ public class SQLQuery {
             return result;
         }
 
+
+        private String getAnnotationsFromField(Field field) {
+
+            StringBuilder constraints = new StringBuilder();
+            try {
+                Annotation[] annotations = field.getAnnotations();
+
+                for (Annotation annotation : annotations) {
+                    Class<? extends Annotation> type = annotation.annotationType();
+                    Method[] methods = type.getDeclaredMethods();
+                    for (Method method : methods) {
+                        Object value = method.invoke(annotation, (Object[]) null);
+                        constraints.append(value).append(" ");
+                    }
+                }
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+            return constraints.toString();
+        }
         private static <T> String[] getKeysValuesOfObject(T object) {
             List<Field> fields = ReflectionUtils.getClassFields(object.getClass());
             ArrayList<String> values = new ArrayList<>();
@@ -179,6 +208,7 @@ public class SQLQuery {
             String keysStr = String.join(", ", keys);
             String valuesStr = String.join(", ", values);
             return new String[]{keysStr, valuesStr};
+
         }
     }
 }

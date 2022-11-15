@@ -1,15 +1,20 @@
 package repository.classes;
 
-import repository.annotations.Constraints;
-import repository.annotations.PrimaryKey;
+import repository.annotations.*;
 
 import java.util.List;
 
 public class User {
-    @PrimaryKey(primaryKey = Constraints.PRIMARY_KEY)
+    @PrimaryKey
+    @Unique
+
+    @Auto_Increment
     private int id;
+
+
     private double weight;
     private boolean isDeveloper;
+    @NotNull
     private String name;
     private List<Animal> animals;
 

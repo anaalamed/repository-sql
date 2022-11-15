@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PrimaryKey {
-    Constraints primaryKey() default Constraints.PRIMARY_KEY;
+public @interface Auto_Increment {
+    Constraints AutoIncrement() default Constraints.AUTO_INCREMENT;
 }
