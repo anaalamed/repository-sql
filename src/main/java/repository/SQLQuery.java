@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class SQLQuery {
     private final String query;
 
@@ -29,36 +30,49 @@ public class SQLQuery {
 
 
         public SQLQueryBuilder select() {
+            logger.info("in SQLQueryBuilder.select()");
+
             query = "SELECT *";
             return this;
         }
 
         public SQLQueryBuilder delete() {
+            logger.info("in SQLQueryBuilder.delete()");
+
             query = "DELETE ";
             return this;
         }
 
         public <T> SQLQueryBuilder from(Class<T> clz) {
+            logger.info("in SQLQueryBuilder.from()");
+
             query += " FROM " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
         public <T> SQLQueryBuilder update(Class<T> clz) {
+            logger.info("in SQLQueryBuilder.update()");
+
             query = " UPDATE " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
         public <T> SQLQueryBuilder dropTable(Class<T> clz) {
+            logger.info("in SQLQueryBuilder.dropTable()");
+
             query = "DROP TABLE " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
         public <T> SQLQueryBuilder truncateTable(Class<T> clz) {
+            logger.info("in SQLQueryBuilder.truncateTable()");
+
             query = "TRUNCATE TABLE " + ReflectionUtils.parseTableName(clz);
             return this;
         }
 
         public <T> SQLQueryBuilder set(List<String> updates) {
+            logger.info("in SQLQueryBuilder.set()");
 
             if (updates.size() == 0) {
                 return this;
@@ -76,6 +90,8 @@ public class SQLQuery {
         }
 
         public SQLQueryBuilder where(List<String> conditions) {
+            logger.info("in SQLQueryBuilder.where()");
+
             if (conditions.size() == 0) {
                 return this;
             }
@@ -92,12 +108,10 @@ public class SQLQuery {
             return this;
         }
 
-        public SQLQuery build() {
-            return new SQLQuery(this);
-        }
-
         // -------------- building dynamic query inside the methods -----------------
         public <T> SQLQueryBuilder createTable(Class<T> clz) {
+            logger.info("in SQLQueryBuilder.createTable()");
+
             this.query = String.format("CREATE TABLE %s (", ReflectionUtils.parseTableName(clz));
 
             try {
@@ -116,9 +130,9 @@ public class SQLQuery {
         }
 
         public <T> SQLQueryBuilder insertOne(T object) {
-            logger.info("insertOne");
+            logger.info("in SQLQueryBuilder.insertOne()");
+
             String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
-            logger.debug("values: " + keysValuesArr[1]);
 
             query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") "
                     + "VALUES (" + keysValuesArr[1] + ")";
@@ -127,6 +141,8 @@ public class SQLQuery {
         }
 
         public <T> SQLQueryBuilder insertMany(List<T> objects) {
+            logger.info("in SQLQueryBuilder.insertMany()");
+
             String keys = "";
             ArrayList<String> values = new ArrayList<>();
 
@@ -144,7 +160,9 @@ public class SQLQuery {
             return this;
         }
 
-
+        public String build() {
+            return new SQLQuery(this).query;
+        }
 
         private String getAnnotationsFromField(Field field) {
 
@@ -166,6 +184,5 @@ public class SQLQuery {
 
             return constraints.toString();
         }
-
     }
 }
