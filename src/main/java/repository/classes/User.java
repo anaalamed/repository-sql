@@ -7,8 +7,6 @@ import java.util.List;
 public class User {
     @PrimaryKey
     @Unique
-
-    @Auto_Increment
     private int id;
 
 

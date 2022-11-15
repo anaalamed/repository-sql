@@ -17,8 +17,6 @@ public class Repository<T> {
     private static Logger logger = LogManager.getLogger(Repository.class.getName());
 
 
-
-
     public Repository(Class<T> clz) {
         this.clz = clz;
     }
@@ -28,7 +26,6 @@ public class Repository<T> {
 
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
              Statement statement = connection.getConnection().createStatement()) {
-            System.out.println(query);
             statement.executeUpdate(query);
             System.out.println("Table Created");
         } catch (Exception e) {
@@ -105,7 +102,7 @@ public class Repository<T> {
         List<T> results = null;
 
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
-            Statement statement = connection.getConnection().createStatement()) {
+             Statement statement = connection.getConnection().createStatement()) {
             ResultSet resultSet = statement.executeQuery(query);
             results = (List<T>) extractResults(resultSet);
             System.out.printf("%d rows in set%n", results.size());
@@ -118,7 +115,7 @@ public class Repository<T> {
 
     public void update(String query) {
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
-            Statement statement = connection.getConnection().createStatement()) {
+             Statement statement = connection.getConnection().createStatement()) {
             int countEffectedRows = statement.executeUpdate(query);
             System.out.printf("Query OK, %d row affected%n", countEffectedRows);
         } catch (Exception e) {

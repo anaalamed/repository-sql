@@ -15,20 +15,20 @@ public class Main {
         Repository<Animal> animalRepository = new Repository<>(Animal.class);
         Repository<User> userRepository = new Repository<>(User.class);
         userRepository.createTable();
-       animalRepository.createTable();
+        animalRepository.createTable();
 
         System.out.println("\n------------------- insert one -----------------------------");
         userRepository.insertOne(new User(1, 1.9999, false, "ana"));
         userRepository.insertOne(new User(2, 3.12, true, "khaled"));
         userRepository.insertOne(new User(3, 1.9999, true, "lior"));
-
-
-//        // check for List
-//        ArrayList<Animal> animalsForUser = new ArrayList<>();
-//        animalsForUser.add(new Animal(1, "a", "a"));
-//        animalsForUser.add(new Animal(2, "b", "b"));
-//        userRepository.insertOne(new User(5, 2.3, true, "ana", animalsForUser));
-
+//
+//
+////        // check for List
+////        ArrayList<Animal> animalsForUser = new ArrayList<>();
+////        animalsForUser.add(new Animal(1, "a", "a"));
+////        animalsForUser.add(new Animal(2, "b", "b"));
+////        userRepository.insertOne(new User(5, 2.3, true, "ana", animalsForUser));
+//
         System.out.println("\n------------------- insert many -----------------------------");
         ArrayList<Animal> animals = new ArrayList<>();
         animals.add(new Animal(1, "a", "a"));
@@ -42,9 +42,6 @@ public class Main {
         List<Animal> animalsList = animalRepository.getAll();
         System.out.println(animalsList);
 
-        System.out.println("\n------------------- get by id -----------------------------");
-        User user = userRepository.getById(2);
-        System.out.println(user);
 
 
         System.out.println("\n------------------- get by property -----------------------------");
@@ -61,7 +58,7 @@ public class Main {
         userRepository.deleteByProperty("id", 1);
 
 
-        System.out.println("\n------------------- delete table -----------------------------");
+//        System.out.println("\n------------------- delete table -----------------------------");
 //        userRepository.deleteTable();
 //        animalRepository.deleteTable();
     }

@@ -92,16 +92,13 @@ public class SQLQuery {
         }
 
 
-
-
-
         public SQLQuery build() {
             return new SQLQuery(this);
         }
 
         // -------------- building dynamic query inside the methods -----------------
         public <T> SQLQueryBuilder createTable(Class<T> clz) {
-            this.query = String.format("CREATE TABLE %s (", parseTableName(clz));
+            this.query = String.format("CREATE TABLE IF NOT EXISTS  %s (", parseTableName(clz));
 
             try {
                 List<Field> classFields = ReflectionUtils.getClassFields(clz);
@@ -159,9 +156,8 @@ public class SQLQuery {
             String fieldTypeValue = field.getType().toString().substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
 
             boolean isSQLField = Arrays.stream(FieldType.values()).anyMatch((t) -> t.name().equals(fieldTypeValue));
-            String result = isSQLField ? FieldType.valueOf(fieldTypeValue).toString() : FieldType.OBJECT.toString();
 
-            return result;
+            return isSQLField ? FieldType.valueOf(fieldTypeValue).toString() : FieldType.OBJECT.toString();
         }
 
 
