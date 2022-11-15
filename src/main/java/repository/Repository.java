@@ -25,7 +25,7 @@ public class Repository<T> {
 
         try (SQLConnection connection = SQLConnection.createSQLConnection("connectionData.json");
              Statement statement = connection.getConnection().createStatement()) {
-            statement.executeUpdate(query);
+             statement.executeUpdate(query);
             System.out.println("Table Created");
         } catch (Exception e) {
             e.printStackTrace();

@@ -17,10 +17,10 @@ public class Main {
         userRepository.createTable();
         animalRepository.createTable();
 
-        System.out.println("\n------------------- insert one -----------------------------");
-        userRepository.insertOne(new User(1, 1.9999, false, "ana"));
-        userRepository.insertOne(new User(2, 3.12, true, "khaled"));
-        userRepository.insertOne(new User(3, 1.9999, true, "lior"));
+//        System.out.println("\n------------------- insert one -----------------------------");
+//        userRepository.insertOne(new User(1, 1.9999, false, "ana"));
+//        userRepository.insertOne(new User(2, 3.12, true, "khaled"));
+//        userRepository.insertOne(new User(3, 1.9999, true, "lior"));
 
 //        // check for List
 //        ArrayList<Animal> animalsForUser = new ArrayList<>();
@@ -42,7 +42,7 @@ public class Main {
         System.out.println(animalsList);
 
         System.out.println("\n------------------- get by id -----------------------------");
-        User user = userRepository.getById(2);
+        User user = userRepository.getById(1);
         System.out.println(user);
 
         System.out.println("\n------------------- get by property -----------------------------");
@@ -54,14 +54,14 @@ public class Main {
         System.out.println("\n------------------- update by property -----------------------------");
         userRepository.updateByProperty("weight", 50, "id", 2);
 
-        System.out.println("\n------------------- delete by property -----------------------------");
-        userRepository.deleteByProperty("id", 1);
+//        System.out.println("\n------------------- delete by property -----------------------------");
+//        userRepository.deleteByProperty("id", 1);
 
         System.out.println("\n------------------- truncate table -----------------------------");
-        userRepository.truncateTable();
+       // userRepository.truncateTable();
 
         System.out.println("\n------------------- delete table -----------------------------");
-        userRepository.dropTable();
-        animalRepository.dropTable();
+        //userRepository.dropTable();
+        //animalRepository.dropTable();
     }
 }

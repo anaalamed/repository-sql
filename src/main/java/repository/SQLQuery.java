@@ -66,15 +66,16 @@ public class SQLQuery {
             if (updates.size() == 0) {
                 return this;
             }
+            StringBuilder setQuery = new StringBuilder(" SET ");
 
-            query += " SET ";
             for (int i = 0; i < updates.size(); i++) {
-                query += updates.get(i);
+                setQuery.append(updates.get(i));
 
                 if (i < updates.size() - 1) {
-                    query += " AND ";
+                    setQuery.append(" AND ");
                 }
             }
+            query+=setQuery.toString();
             return this;
         }
 
@@ -82,16 +83,16 @@ public class SQLQuery {
             if (conditions.size() == 0) {
                 return this;
             }
+            StringBuilder WhereQuery = new StringBuilder(" WHERE ");
 
-            query += " WHERE ";
             for (int i = 0; i < conditions.size(); i++) {
-                query += conditions.get(i);
+                WhereQuery.append(conditions.get(i));
 
                 if (i < conditions.size() - 1) {
-                    query += " AND ";
+                    WhereQuery.append(" AND ");
                 }
             }
-
+            query+=WhereQuery.toString();
             return this;
         }
 
@@ -102,20 +103,19 @@ public class SQLQuery {
 
         // -------------- building dynamic query inside the methods -----------------
         public <T> SQLQueryBuilder createTable(Class<T> clz) {
-            this.query = String.format("CREATE TABLE IF NOT EXISTS  %s (", parseTableName(clz));
-
+            StringBuilder createTableQuery = new StringBuilder(String.format("CREATE TABLE IF NOT EXISTS  %s (", parseTableName(clz)));
             try {
                 List<Field> classFields = ReflectionUtils.getClassFields(clz);
 
                 for (Field field : classFields) {
-                    query += String.format("%s %s %s,", field.getName(),
-                            getFieldSQLType(field), getAnnotationsFromField(field));
+                    createTableQuery.append(String.format("%s %s %s,", field.getName(), getFieldSQLType(field), getAnnotationsFromField(field)));
                 }
+                query = createTableQuery.toString();
                 query = query.substring(0, query.length() - 1) + ")";
+
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-
             return this;
         }
 
@@ -124,8 +124,7 @@ public class SQLQuery {
             String[] keysValuesArr = getKeysValuesOfObject(object);
             logger.debug("values: " + keysValuesArr[1]);
 
-            query = "INSERT INTO " + parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") "
-                    + "VALUES (" + keysValuesArr[1] + ")";
+            query = "INSERT INTO " + parseTableName(object.getClass()) + " (" + keysValuesArr[0] + ") " + "VALUES (" + keysValuesArr[1] + ")";
 
             return this;
         }
@@ -134,16 +133,15 @@ public class SQLQuery {
             String keys = "";
             ArrayList<String> values = new ArrayList<>();
 
-            for (T object: objects) {
+            for (T object : objects) {
                 String[] keysValuesArr = getKeysValuesOfObject(object);
-                keys =  ("(" + keysValuesArr[0] + ")");
+                keys = ("(" + keysValuesArr[0] + ")");
                 values.add("(" + keysValuesArr[1] + ")");
             }
 
             String valuesStr = String.join(", ", values);
 
-            query = "INSERT INTO " + parseTableName(objects.get(0).getClass()) + keys
-                    + "VALUES" + valuesStr;
+            query = "INSERT INTO " + parseTableName(objects.get(0).getClass()) + keys + "VALUES" + valuesStr;
 
             return this;
         }
@@ -154,7 +152,6 @@ public class SQLQuery {
 
         private String getFieldSQLType(Field field) {
             String fieldTypeValue = field.getType().toString().substring(field.getType().toString().lastIndexOf('.') + 1).toUpperCase();
-
             boolean isSQLField = Arrays.stream(FieldType.values()).anyMatch((t) -> t.name().equals(fieldTypeValue));
 
             return isSQLField ? FieldType.valueOf(fieldTypeValue).toString() : FieldType.OBJECT.toString();
@@ -180,6 +177,7 @@ public class SQLQuery {
 
             return constraints.toString();
         }
+
         private static <T> String[] getKeysValuesOfObject(T object) {
             List<Field> fields = ReflectionUtils.getClassFields(object.getClass());
             ArrayList<String> values = new ArrayList<>();
