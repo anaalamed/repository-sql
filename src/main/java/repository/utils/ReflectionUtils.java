@@ -6,9 +6,7 @@ import repository.FieldType;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static repository.FieldType.isBoxedPrimitive;
 
@@ -45,19 +43,30 @@ public class ReflectionUtils {
         return result;
     }
 
-    public static <T> String[] getKeysValuesOfObject(T object) {
+
+    public static <T> Map<String, String> getMapKeysValuesOfObject(T object) {
         List<Field> fields = ReflectionUtils.getClassFields(object.getClass());
-        ArrayList<String> values = new ArrayList<>();
-        ArrayList<String> keys = new ArrayList<>();
+        HashMap<String, String> map = new HashMap<>();
 
         for (Field field : fields) {
-            keys.add(field.getName());
-            values.add(extractFieldValue(object, field));
+            map.put(field.getName(), extractFieldValue(object, field));
         }
 
-        String keysStr = String.join(", ", keys);
-        String valuesStr = String.join(", ", values);
-        return new String[]{keysStr, valuesStr};
+        return map;
+    }
+
+    public static <T> String createKeysStringForQuery(T object) {
+        Map<String, String> mapKeysValues = ReflectionUtils.getMapKeysValuesOfObject(object);
+
+        String keysStr = String.join(", ", mapKeysValues.keySet());
+        return " (" + keysStr + ") ";
+    }
+
+    public static <T> String createValuesStringForQuery(T object) {
+        Map<String, String> mapKeysValues = ReflectionUtils.getMapKeysValuesOfObject(object);
+
+        String valuesStr = String.join(", ", mapKeysValues.values());
+        return " (" + valuesStr + ") ";
     }
 
     private static <T> String extractFieldValue(T object, Field field) {

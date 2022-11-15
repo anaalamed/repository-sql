@@ -83,7 +83,7 @@ public class SQLQuery {
                 query += updates.get(i);
 
                 if (i < updates.size() - 1) {
-                    query += " AND ";
+                    query += " , ";
                 }
             }
             return this;
@@ -132,28 +132,24 @@ public class SQLQuery {
         public <T> SQLQueryBuilder insertOne(T object) {
             logger.info("in SQLQueryBuilder.insertOne()");
 
-            List<T> wrappingList = new ArrayList<>();
-            wrappingList.add(object);
+            query = "INSERT INTO " + ReflectionUtils.parseTableName(object.getClass()) + ReflectionUtils.createKeysStringForQuery(object)
+                    + "VALUES " + ReflectionUtils.createValuesStringForQuery(object);
 
-            return insertMany(wrappingList);
+            return this;
         }
 
         public <T> SQLQueryBuilder insertMany(List<T> objects) {
             logger.info("in SQLQueryBuilder.insertMany()");
 
-            String keys = "";
             ArrayList<String> values = new ArrayList<>();
-
             for (T object: objects) {
-                String[] keysValuesArr = ReflectionUtils.getKeysValuesOfObject(object);
-                keys = ("(" + keysValuesArr[0] + ")");
-                values.add("(" + keysValuesArr[1] + ")");
+                values.add( ReflectionUtils.createValuesStringForQuery(object) );
             }
 
             String valuesStr = String.join(", ", values);
 
-            query = "INSERT INTO " + ReflectionUtils.parseTableName(objects.get(0).getClass()) + keys
-                    + " VALUES" + valuesStr;
+            query = "INSERT INTO " + ReflectionUtils.parseTableName(objects.get(0).getClass()) + ReflectionUtils.createKeysStringForQuery(objects.get(0))
+                    + "VALUES" + valuesStr;
 
             return this;
         }
