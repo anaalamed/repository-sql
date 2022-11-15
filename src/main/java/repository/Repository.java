@@ -65,13 +65,6 @@ public class Repository<T> {
         logger.debug("Executing query: " + query);
         executeUpdateQuery(query);
 
-        // get inserted entity
-//        List<T> entities = getAddedEntity(object);
-//        if ( entities == null || entities.size() == 0) {
-//            throw new NullPointerException("Entity wasn't added");
-//        }
-//        T entityAdded = entities.get(0);                               // suppose there are no the same items
-//        logger.debug("Inserted entity: " + entityAdded);
         return getAddedEntity(object);
     }
 
@@ -81,15 +74,9 @@ public class Repository<T> {
         logger.debug("Executing query: " + query);
         executeUpdateQuery(query);
 
-        // get inserted entities
         List<T> insertedEntities = new ArrayList<>();
         for (T object: objects) {
             insertedEntities.add(getAddedEntity(object));
-//            List<T> entities = getAddedEntity(object);
-//            if ( entities == null || entities.size() == 0) {
-//                throw new NullPointerException("One or more entities weren't added");
-//            }
-//            insertedEntities.add(entities.get(0));                        // suppose there are no the same items
         }
         logger.debug("Inserted entities: " + insertedEntities);
         return insertedEntities;
@@ -110,14 +97,26 @@ public class Repository<T> {
                                  String conditionProperty, Object conditionValue) {
         logger.info("in updateByProperty()");
 
-        List<String> conditions = new ArrayList<>();
-        conditions.add(conditionProperty + " = \"" + conditionValue + "\"");
+        List<String> condition = new ArrayList<>(List.of(conditionProperty + " = \"" + conditionValue + "\""));
+        List<String> update = new ArrayList<>(List.of(propertyToUpdate + " = \"" + valueToUpdate + "\""));
 
+        String query = new SQLQuery.SQLQueryBuilder().update(clz).set(update).where(condition).build();
+        logger.debug("Executing query: " + query);
+        executeUpdateQuery(query);
+    }
+
+    public void updateEntireEntity(String conditionProperty, Object conditionValue, T object) {
+        logger.info("in updateEntireProperty()");
+
+        List<String> condition = new ArrayList<>(List.of(conditionProperty + " = \"" + conditionValue + "\""));
+
+        Map<String,String> mapKeysValues = ReflectionUtils.getMapKeysValuesOfObject(object);
         List<String> updates = new ArrayList<>();
-        updates.add(propertyToUpdate + " = \"" + valueToUpdate + "\"");
+        for (String key: mapKeysValues.keySet() ) {
+            updates.add(key + " = " + mapKeysValues.get(key) );
+        }
 
-        String query = new SQLQuery.SQLQueryBuilder().update(clz).set(updates).where(conditions).build();
-
+        String query = new SQLQuery.SQLQueryBuilder().update(clz).set(updates).where(condition).build();
         logger.debug("Executing query: " + query);
         executeUpdateQuery(query);
     }

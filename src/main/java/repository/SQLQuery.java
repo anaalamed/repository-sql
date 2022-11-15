@@ -84,7 +84,7 @@ public class SQLQuery {
                 query += updates.get(i);
 
                 if (i < updates.size() - 1) {
-                    query += " AND ";
+                    query += " , ";
                 }
             }
             return this;
